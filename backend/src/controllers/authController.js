@@ -58,7 +58,7 @@ export const register = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role: role || "professional",
+      role: role === "recruiter" ? "recruiter" : "professional",
       specialization,
       experience,
       skills,
@@ -94,7 +94,6 @@ export const register = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Server error during registration.",
-      error: error.message,
     });
   }
 };

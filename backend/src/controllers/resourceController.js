@@ -26,7 +26,7 @@ export const createResource = async (req, res) => {
     }
 
     // Upload file to Cloudinary
-    const result = uploadToCloudinary(
+    const result = await uploadToCloudinary(
       req.file.path,
       "telecom-network/resources",
     );

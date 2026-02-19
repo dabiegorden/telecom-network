@@ -22,20 +22,35 @@ const postSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    createdAt: {
-      type: Date,
-      default: Date.now,
+
+    // ─── Attachments (image or file) ───────────────────────────────────
+    attachmentUrl: { type: String, default: null },
+    attachmentPublicId: { type: String, default: null },
+    attachmentName: { type: String, default: null },
+    attachmentType: {
+      type: String,
+      enum: ["image", "pdf", "document", "spreadsheet", "other", null],
+      default: null,
     },
+    attachmentMime: { type: String, default: null },
+    attachmentSize: { type: Number, default: null },
+
+    // ─── Engagement ────────────────────────────────────────────────────
+    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    likeCount: { type: Number, default: 0 },
+    commentCount: { type: Number, default: 0 },
+    viewCount: { type: Number, default: 0 },
+
+    // ─── Admin controls ────────────────────────────────────────────────
+    isPinned: { type: Boolean, default: false },
+    isActive: { type: Boolean, default: true },
   },
-  {
-    timestamps: true,
-  },
+  { timestamps: true },
 );
 
-// Index for faster queries
 postSchema.index({ author: 1, createdAt: -1 });
 postSchema.index({ category: 1 });
+postSchema.index({ isPinned: -1, createdAt: -1 });
 
 const Post = mongoose.model("Post", postSchema);
-
 export default Post;

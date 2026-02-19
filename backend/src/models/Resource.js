@@ -16,24 +16,43 @@ const resourceSchema = new mongoose.Schema(
       type: String,
       required: [true, "File URL is required"],
     },
+    // Cloudinary public_id — required for deletion
+    filePublicId: {
+      type: String,
+      default: null,
+    },
+    // Original filename shown in the UI
+    fileName: {
+      type: String,
+      default: null,
+    },
+    // Category used to render the right icon / badge
+    fileType: {
+      type: String,
+      enum: ["image", "pdf", "document", "spreadsheet", "other"],
+      default: "other",
+    },
+    // Raw MIME string, e.g. "application/pdf"
+    mimeType: {
+      type: String,
+      default: null,
+    },
+    // File size in bytes
+    fileSize: {
+      type: Number,
+      default: null,
+    },
     uploadedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
   },
-  {
-    timestamps: true,
-  },
+  { timestamps: true },
 );
 
-// Index for faster queries
 resourceSchema.index({ uploadedBy: 1, createdAt: -1 });
+resourceSchema.index({ fileType: 1 });
 
 const Resource = mongoose.model("Resource", resourceSchema);
-
 export default Resource;

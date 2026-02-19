@@ -1,5 +1,74 @@
 import Post from "../models/Post.js";
 import Comment from "../models/Comment.js";
+import {
+  uploadToCloudinary,
+  deleteFromCloudinary,
+} from "../utils/cloudinary.js";
+import fs from "fs";
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const cleanupFile = (path) => {
+  if (path && fs.existsSync(path)) {
+    try {
+      fs.unlinkSync(path);
+    } catch (_) {}
+  }
+};
+
+const ALLOWED_MIMES = new Set([
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+  "image/svg+xml",
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "text/csv",
+]);
+
+const detectFileType = (mime = "") => {
+  if (mime.startsWith("image/")) return "image";
+  if (mime === "application/pdf") return "pdf";
+  if (mime.includes("word")) return "document";
+  if (mime.includes("excel") || mime.includes("sheet") || mime === "text/csv")
+    return "spreadsheet";
+  return "other";
+};
+
+const uploadAttachment = async (file) => {
+  const isImage = file.mimetype.startsWith("image/");
+  const result = await uploadToCloudinary(file.path, "telecom-network/posts", {
+    resource_type: isImage ? "image" : "raw",
+  });
+  cleanupFile(file.path);
+  return {
+    attachmentUrl: result.url,
+    attachmentPublicId: result.publicId || result.public_id || null,
+    attachmentName: file.originalname,
+    attachmentType: detectFileType(file.mimetype),
+    attachmentMime: file.mimetype,
+    attachmentSize: file.size,
+  };
+};
+
+const deleteAttachment = async (publicId, fileType) => {
+  if (!publicId) return;
+  try {
+    await deleteFromCloudinary(
+      publicId,
+      fileType === "image" ? "image" : "raw",
+    );
+  } catch (e) {
+    console.error("Attachment deletion error:", e);
+  }
+};
+
+// ─── Posts ────────────────────────────────────────────────────────────────────
 
 /**
  * @desc    Create a new post
@@ -10,22 +79,29 @@ export const createPost = async (req, res) => {
   try {
     const { title, content, category } = req.body;
 
-    // Validate required fields
     if (!title || !content || !category) {
+      cleanupFile(req.file?.path);
       return res.status(400).json({
         success: false,
         message: "Please provide title, content, and category.",
       });
     }
 
-    const post = await Post.create({
-      title,
-      content,
-      category,
-      author: req.user._id,
-    });
+    if (req.file && !ALLOWED_MIMES.has(req.file.mimetype)) {
+      cleanupFile(req.file.path);
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid file type." });
+    }
 
-    // Populate author details
+    const postData = { title, content, category, author: req.user._id };
+
+    if (req.file) {
+      const attach = await uploadAttachment(req.file);
+      Object.assign(postData, attach);
+    }
+
+    const post = await Post.create(postData);
     await post.populate("author", "name email profileImage specialization");
 
     res.status(201).json({
@@ -34,6 +110,7 @@ export const createPost = async (req, res) => {
       data: post,
     });
   } catch (error) {
+    cleanupFile(req.file?.path);
     console.error("Create post error:", error);
     res.status(500).json({
       success: false,
@@ -50,21 +127,38 @@ export const createPost = async (req, res) => {
  */
 export const getAllPosts = async (req, res) => {
   try {
-    const { category, page = 1, limit = 10 } = req.query;
+    const {
+      category,
+      page = 1,
+      limit = 20,
+      search,
+      sort = "newest",
+    } = req.query;
 
-    // Build query
-    const query = category ? { category } : {};
+    const query = { isActive: true };
+    if (category && category !== "all") query.category = category;
+    if (search) {
+      query.$or = [
+        { title: new RegExp(search, "i") },
+        { content: new RegExp(search, "i") },
+      ];
+    }
 
-    // Calculate pagination
+    const sortMap = {
+      newest: { isPinned: -1, createdAt: -1 },
+      oldest: { isPinned: -1, createdAt: 1 },
+      popular: { isPinned: -1, likeCount: -1, commentCount: -1 },
+    };
+
     const skip = (page - 1) * limit;
-
-    const posts = await Post.find(query)
-      .populate("author", "name email profileImage specialization")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(parseInt(limit));
-
-    const total = await Post.countDocuments(query);
+    const [posts, total] = await Promise.all([
+      Post.find(query)
+        .populate("author", "name email profileImage specialization")
+        .sort(sortMap[sort] || sortMap.newest)
+        .skip(skip)
+        .limit(parseInt(limit)),
+      Post.countDocuments(query),
+    ]);
 
     res.status(200).json({
       success: true,
@@ -85,28 +179,24 @@ export const getAllPosts = async (req, res) => {
 };
 
 /**
- * @desc    Get single post by ID
+ * @desc    Get single post by ID (increments view count)
  * @route   GET /api/posts/:id
  * @access  Public
  */
 export const getPostById = async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id).populate(
-      "author",
-      "name email profileImage specialization",
-    );
+    const post = await Post.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { viewCount: 1 } },
+      { new: true },
+    ).populate("author", "name email profileImage specialization");
 
-    if (!post) {
-      return res.status(404).json({
-        success: false,
-        message: "Post not found.",
-      });
-    }
+    if (!post)
+      return res
+        .status(404)
+        .json({ success: false, message: "Post not found." });
 
-    res.status(200).json({
-      success: true,
-      data: post,
-    });
+    res.status(200).json({ success: true, data: post });
   } catch (error) {
     console.error("Get post by ID error:", error);
     res.status(500).json({
@@ -124,33 +214,59 @@ export const getPostById = async (req, res) => {
  */
 export const updatePost = async (req, res) => {
   try {
-    const { title, content, category } = req.body;
-
+    const { title, content, category, removeAttachment } = req.body;
     const post = await Post.findById(req.params.id);
 
     if (!post) {
-      return res.status(404).json({
-        success: false,
-        message: "Post not found.",
-      });
+      cleanupFile(req.file?.path);
+      return res
+        .status(404)
+        .json({ success: false, message: "Post not found." });
     }
 
-    // Check if user is the author
-    if (post.author.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: "You are not authorized to update this post.",
-      });
+    if (
+      post.author.toString() !== req.user._id.toString() &&
+      req.user.role !== "admin" &&
+      req.user.role !== "recruiter"
+    ) {
+      cleanupFile(req.file?.path);
+      return res
+        .status(403)
+        .json({ success: false, message: "Not authorized." });
     }
 
-    // Update fields
     if (title) post.title = title;
     if (content) post.content = content;
     if (category) post.category = category;
 
-    await post.save();
+    // Handle attachment removal
+    if (removeAttachment === "true" && post.attachmentPublicId) {
+      await deleteAttachment(post.attachmentPublicId, post.attachmentType);
+      post.attachmentUrl = null;
+      post.attachmentPublicId = null;
+      post.attachmentName = null;
+      post.attachmentType = null;
+      post.attachmentMime = null;
+      post.attachmentSize = null;
+    }
 
-    // Populate author details
+    // Replace attachment
+    if (req.file) {
+      if (ALLOWED_MIMES.has(req.file.mimetype)) {
+        if (post.attachmentPublicId) {
+          await deleteAttachment(post.attachmentPublicId, post.attachmentType);
+        }
+        const attach = await uploadAttachment(req.file);
+        Object.assign(post, attach);
+      } else {
+        cleanupFile(req.file.path);
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid file type." });
+      }
+    }
+
+    await post.save();
     await post.populate("author", "name email profileImage specialization");
 
     res.status(200).json({
@@ -159,6 +275,7 @@ export const updatePost = async (req, res) => {
       data: post,
     });
   } catch (error) {
+    cleanupFile(req.file?.path);
     console.error("Update post error:", error);
     res.status(500).json({
       success: false,
@@ -176,34 +293,41 @@ export const updatePost = async (req, res) => {
 export const deletePost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
+    if (!post)
+      return res
+        .status(404)
+        .json({ success: false, message: "Post not found." });
 
-    if (!post) {
-      return res.status(404).json({
-        success: false,
-        message: "Post not found.",
-      });
-    }
-
-    // Check if user is the author or admin
     if (
       post.author.toString() !== req.user._id.toString() &&
-      req.user.role !== "admin"
+      req.user.role !== "admin" &&
+      req.user.role !== "recruiter"
     ) {
-      return res.status(403).json({
-        success: false,
-        message: "You are not authorized to delete this post.",
-      });
+      return res
+        .status(403)
+        .json({ success: false, message: "Not authorized." });
     }
 
-    // Delete all comments associated with this post
-    await Comment.deleteMany({ post: post._id });
+    // Delete post attachment from Cloudinary
+    if (post.attachmentPublicId) {
+      await deleteAttachment(post.attachmentPublicId, post.attachmentType);
+    }
 
+    // Delete all comment attachments from Cloudinary
+    const comments = await Comment.find({
+      post: post._id,
+      attachmentPublicId: { $ne: null },
+    });
+    for (const c of comments) {
+      await deleteAttachment(c.attachmentPublicId, c.attachmentType);
+    }
+
+    await Comment.deleteMany({ post: post._id });
     await post.deleteOne();
 
-    res.status(200).json({
-      success: true,
-      message: "Post deleted successfully.",
-    });
+    res
+      .status(200)
+      .json({ success: true, message: "Post deleted successfully." });
   } catch (error) {
     console.error("Delete post error:", error);
     res.status(500).json({
@@ -215,37 +339,142 @@ export const deletePost = async (req, res) => {
 };
 
 /**
- * @desc    Add comment to post
+ * @desc    Toggle like on post
+ * @route   POST /api/posts/:id/like
+ * @access  Private
+ */
+export const togglePostLike = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post)
+      return res
+        .status(404)
+        .json({ success: false, message: "Post not found." });
+
+    const userId = req.user._id;
+    const alreadyLiked = post.likes.some(
+      (id) => id.toString() === userId.toString(),
+    );
+
+    if (alreadyLiked) {
+      post.likes = post.likes.filter(
+        (id) => id.toString() !== userId.toString(),
+      );
+      post.likeCount = Math.max(0, post.likeCount - 1);
+    } else {
+      post.likes.push(userId);
+      post.likeCount = post.likeCount + 1;
+    }
+
+    await post.save();
+    res.status(200).json({
+      success: true,
+      liked: !alreadyLiked,
+      likeCount: post.likeCount,
+    });
+  } catch (error) {
+    console.error("Toggle like error:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Server error.", error: error.message });
+  }
+};
+
+/**
+ * @desc    Pin / unpin a post (admin only)
+ * @route   PATCH /api/posts/:id/pin
+ * @access  Admin
+ */
+export const togglePinPost = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post)
+      return res
+        .status(404)
+        .json({ success: false, message: "Post not found." });
+
+    post.isPinned = !post.isPinned;
+    await post.save();
+
+    res.status(200).json({
+      success: true,
+      message: post.isPinned ? "Post pinned." : "Post unpinned.",
+      isPinned: post.isPinned,
+    });
+  } catch (error) {
+    console.error("Toggle pin error:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Server error.", error: error.message });
+  }
+};
+
+// ─── Comments ─────────────────────────────────────────────────────────────────
+
+/**
+ * @desc    Add comment (or reply) to post
  * @route   POST /api/posts/:id/comments
  * @access  Private
  */
 export const addComment = async (req, res) => {
   try {
-    const { content } = req.body;
+    const { content, parentComment } = req.body;
 
     if (!content) {
-      return res.status(400).json({
-        success: false,
-        message: "Please provide comment content.",
-      });
+      cleanupFile(req.file?.path);
+      return res
+        .status(400)
+        .json({ success: false, message: "Please provide comment content." });
     }
 
     const post = await Post.findById(req.params.id);
-
     if (!post) {
-      return res.status(404).json({
-        success: false,
-        message: "Post not found.",
-      });
+      cleanupFile(req.file?.path);
+      return res
+        .status(404)
+        .json({ success: false, message: "Post not found." });
     }
 
-    const comment = await Comment.create({
+    // Validate parent comment if replying
+    if (parentComment) {
+      const parent = await Comment.findById(parentComment);
+      if (!parent || parent.post.toString() !== post._id.toString()) {
+        cleanupFile(req.file?.path);
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid parent comment." });
+      }
+    }
+
+    if (req.file && !ALLOWED_MIMES.has(req.file.mimetype)) {
+      cleanupFile(req.file.path);
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid file type." });
+    }
+
+    const commentData = {
       post: post._id,
       user: req.user._id,
       content,
-    });
+      parentComment: parentComment || null,
+    };
 
-    // Populate user details
+    if (req.file) {
+      const attach = await uploadAttachment(req.file);
+      Object.assign(commentData, attach);
+    }
+
+    const comment = await Comment.create(commentData);
+
+    // Update counts
+    if (parentComment) {
+      await Comment.findByIdAndUpdate(parentComment, {
+        $inc: { replyCount: 1 },
+      });
+    }
+    await Post.findByIdAndUpdate(post._id, { $inc: { commentCount: 1 } });
+
     await comment.populate("user", "name email profileImage specialization");
 
     res.status(201).json({
@@ -254,6 +483,7 @@ export const addComment = async (req, res) => {
       data: comment,
     });
   } catch (error) {
+    cleanupFile(req.file?.path);
     console.error("Add comment error:", error);
     res.status(500).json({
       success: false,
@@ -264,19 +494,34 @@ export const addComment = async (req, res) => {
 };
 
 /**
- * @desc    Get comments for a post
+ * @desc    Get top-level comments for a post (with reply counts)
  * @route   GET /api/posts/:id/comments
  * @access  Public
  */
 export const getCommentsByPost = async (req, res) => {
   try {
-    const comments = await Comment.find({ post: req.params.id })
-      .populate("user", "name email profileImage specialization")
-      .sort({ createdAt: -1 });
+    const { page = 1, limit = 20 } = req.query;
+    const skip = (page - 1) * limit;
+
+    const [comments, total] = await Promise.all([
+      Comment.find({ post: req.params.id, parentComment: null, isActive: true })
+        .populate("user", "name email profileImage specialization")
+        .sort({ createdAt: 1 })
+        .skip(skip)
+        .limit(parseInt(limit)),
+      Comment.countDocuments({
+        post: req.params.id,
+        parentComment: null,
+        isActive: true,
+      }),
+    ]);
 
     res.status(200).json({
       success: true,
       count: comments.length,
+      total,
+      page: parseInt(page),
+      pages: Math.ceil(total / limit),
       data: comments,
     });
   } catch (error) {
@@ -290,38 +535,132 @@ export const getCommentsByPost = async (req, res) => {
 };
 
 /**
- * @desc    Delete comment
+ * @desc    Get replies for a comment
+ * @route   GET /api/posts/:id/comments/:commentId/replies
+ * @access  Public
+ */
+export const getReplies = async (req, res) => {
+  try {
+    const replies = await Comment.find({
+      post: req.params.id,
+      parentComment: req.params.commentId,
+      isActive: true,
+    })
+      .populate("user", "name email profileImage specialization")
+      .sort({ createdAt: 1 });
+
+    res
+      .status(200)
+      .json({ success: true, count: replies.length, data: replies });
+  } catch (error) {
+    console.error("Get replies error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error fetching replies.",
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * @desc    Toggle like on a comment
+ * @route   POST /api/posts/:postId/comments/:commentId/like
+ * @access  Private
+ */
+export const toggleCommentLike = async (req, res) => {
+  try {
+    const comment = await Comment.findById(req.params.commentId);
+    if (!comment)
+      return res
+        .status(404)
+        .json({ success: false, message: "Comment not found." });
+
+    const userId = req.user._id;
+    const alreadyLiked = comment.likes.some(
+      (id) => id.toString() === userId.toString(),
+    );
+
+    if (alreadyLiked) {
+      comment.likes = comment.likes.filter(
+        (id) => id.toString() !== userId.toString(),
+      );
+      comment.likeCount = Math.max(0, comment.likeCount - 1);
+    } else {
+      comment.likes.push(userId);
+      comment.likeCount = comment.likeCount + 1;
+    }
+
+    await comment.save();
+    res.status(200).json({
+      success: true,
+      liked: !alreadyLiked,
+      likeCount: comment.likeCount,
+    });
+  } catch (error) {
+    console.error("Toggle comment like error:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Server error.", error: error.message });
+  }
+};
+
+/**
+ * @desc    Delete comment (soft or hard, cascades to replies)
  * @route   DELETE /api/posts/:postId/comments/:commentId
  * @access  Private
  */
 export const deleteComment = async (req, res) => {
   try {
     const comment = await Comment.findById(req.params.commentId);
+    if (!comment)
+      return res
+        .status(404)
+        .json({ success: false, message: "Comment not found." });
 
-    if (!comment) {
-      return res.status(404).json({
-        success: false,
-        message: "Comment not found.",
-      });
-    }
-
-    // Check if user is the comment author or admin
     if (
       comment.user.toString() !== req.user._id.toString() &&
       req.user.role !== "admin"
     ) {
-      return res.status(403).json({
-        success: false,
-        message: "You are not authorized to delete this comment.",
+      return res
+        .status(403)
+        .json({ success: false, message: "Not authorized." });
+    }
+
+    // Delete attachment from Cloudinary
+    if (comment.attachmentPublicId) {
+      await deleteAttachment(
+        comment.attachmentPublicId,
+        comment.attachmentType,
+      );
+    }
+
+    // Delete all replies' attachments and the replies themselves
+    const replies = await Comment.find({ parentComment: comment._id });
+    for (const reply of replies) {
+      if (reply.attachmentPublicId) {
+        await deleteAttachment(reply.attachmentPublicId, reply.attachmentType);
+      }
+    }
+    const replyCount = replies.length;
+    await Comment.deleteMany({ parentComment: comment._id });
+
+    // Decrement post comment count (comment + its replies)
+    await Post.findByIdAndUpdate(comment.post, {
+      $inc: { commentCount: -(1 + replyCount) },
+    });
+
+    // If it was a reply, decrement parent's replyCount
+    if (comment.parentComment) {
+      await Comment.findByIdAndUpdate(comment.parentComment, {
+        $inc: { replyCount: -1 },
       });
     }
 
     await comment.deleteOne();
 
-    res.status(200).json({
-      success: true,
-      message: "Comment deleted successfully.",
-    });
+    res
+      .status(200)
+      .json({ success: true, message: "Comment deleted successfully." });
   } catch (error) {
     console.error("Delete comment error:", error);
     res.status(500).json({
@@ -329,5 +668,49 @@ export const deleteComment = async (req, res) => {
       message: "Server error deleting comment.",
       error: error.message,
     });
+  }
+};
+
+/**
+ * @desc    Admin — get all posts including inactive
+ * @route   GET /api/posts/admin/all
+ * @access  Admin
+ */
+export const adminGetAllPosts = async (req, res) => {
+  try {
+    const { category, page = 1, limit = 20, search } = req.query;
+
+    const query = {};
+    if (category && category !== "all") query.category = category;
+    if (search) {
+      query.$or = [
+        { title: new RegExp(search, "i") },
+        { content: new RegExp(search, "i") },
+      ];
+    }
+
+    const skip = (page - 1) * limit;
+    const [posts, total] = await Promise.all([
+      Post.find(query)
+        .populate("author", "name email profileImage specialization")
+        .sort({ isPinned: -1, createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit)),
+      Post.countDocuments(query),
+    ]);
+
+    res.status(200).json({
+      success: true,
+      count: posts.length,
+      total,
+      page: parseInt(page),
+      pages: Math.ceil(total / limit),
+      data: posts,
+    });
+  } catch (error) {
+    console.error("Admin get all posts error:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Server error.", error: error.message });
   }
 };

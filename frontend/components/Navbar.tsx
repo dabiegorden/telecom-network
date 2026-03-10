@@ -157,15 +157,15 @@ const Navbar = () => {
                       <div
                         className={`w-8 h-8 bg-linear-to-r ${getRoleBadgeColor()} rounded-full flex items-center justify-center text-white font-semibold text-sm`}
                       >
-                        {user.name.charAt(0).toUpperCase()}
+                        {user?.name?.charAt(0)?.toUpperCase()}
                       </div>
                     )}
                     <div className="hidden lg:block text-left">
                       <div className="text-sm font-semibold text-white">
-                        {user.name.split(" ")[0]}
+                        {user?.name?.split(" ")[0]}
                       </div>
                       <div className="text-xs text-slate-400 capitalize">
-                        {user.role}
+                        {user?.role}
                       </div>
                     </div>
                   </button>
@@ -201,21 +201,21 @@ const Navbar = () => {
                                 <div
                                   className={`w-12 h-12 bg-linear-to-r ${getRoleBadgeColor()} rounded-full flex items-center justify-center text-white font-bold text-lg`}
                                 >
-                                  {user.name.charAt(0).toUpperCase()}
+                                  {user?.name?.charAt(0).toUpperCase()}
                                 </div>
                               )}
                               <div className="flex-1 min-w-0">
                                 <div className="text-sm font-semibold text-white truncate">
-                                  {user.name}
+                                  {user?.name}
                                 </div>
                                 <div className="text-xs text-slate-400 truncate">
-                                  {user.email}
+                                  {user?.email}
                                 </div>
                               </div>
                             </div>
-                            {user.specialization && (
+                            {user?.specialization && (
                               <div className="mt-2 px-2 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded text-xs text-cyan-400 text-center">
-                                {user.specialization}
+                                {user?.specialization}
                               </div>
                             )}
                           </div>
@@ -316,7 +316,7 @@ const Navbar = () => {
                 {user && (
                   <div className="mb-6 p-4 bg-slate-800/30 border border-slate-700 rounded-xl">
                     <div className="flex items-center space-x-3 mb-3">
-                      {user.profileImage ? (
+                      {user?.profileImage ? (
                         <img
                           src={user.profileImage}
                           alt={user.name}
@@ -326,15 +326,15 @@ const Navbar = () => {
                         <div
                           className={`w-12 h-12 bg-linear-to-r ${getRoleBadgeColor()} rounded-full flex items-center justify-center text-white font-bold text-lg`}
                         >
-                          {user.name.charAt(0).toUpperCase()}
+                          {user?.name.charAt(0).toUpperCase()}
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-semibold text-white truncate">
-                          {user.name}
+                          {user?.name}
                         </div>
                         <div className="text-xs text-slate-400 truncate">
-                          {user.email}
+                          {user?.email}
                         </div>
                       </div>
                     </div>

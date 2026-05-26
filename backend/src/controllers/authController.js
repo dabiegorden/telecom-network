@@ -53,12 +53,23 @@ export const register = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
+    // Allowed roles
+    const allowedRoles = ["professional", "recruiter", "admin"];
+
+    // Validate role
+    if (role && !allowedRoles.includes(role)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid role provided.",
+      });
+    }
+
     // Create user
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
-      role: role === "recruiter" ? "recruiter" : "professional",
+      role: role || "professional", // default role
       specialization,
       experience,
       skills,

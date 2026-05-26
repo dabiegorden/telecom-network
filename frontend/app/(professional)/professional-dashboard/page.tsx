@@ -412,7 +412,7 @@ const ProfessionalDashboard = () => {
               <div className="text-center py-8 text-slate-400">
                 <Send className="h-12 w-12 mx-auto mb-3 opacity-50" />
                 <p>No applications yet</p>
-                <Link href="/professional/jobs">
+                <Link href="/professional-dashboard/jobs">
                   <Button
                     variant="outline"
                     size="sm"
@@ -472,7 +472,7 @@ const ProfessionalDashboard = () => {
                   Latest discussions
                 </CardDescription>
               </div>
-              <Link href="/professional/posts">
+              <Link href="/professional-dashboard/posts">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -541,7 +541,7 @@ const ProfessionalDashboard = () => {
                 Latest learning materials and documents
               </CardDescription>
             </div>
-            <Link href="/professional/resources">
+            <Link href="/professional-dashboard/resources">
               <Button
                 variant="ghost"
                 size="sm"
@@ -600,7 +600,7 @@ const ProfessionalDashboard = () => {
       </Card>
 
       {/* Quick Actions */}
-      <Card className="bg-linear-to-r from-cyan-500/5 via-blue-500/5 to-purple-500/5 border-slate-700">
+      {/* <Card className="bg-linear-to-r from-cyan-500/5 via-blue-500/5 to-purple-500/5 border-slate-700">
         <CardHeader>
           <CardTitle className="text-white">Quick Actions</CardTitle>
           <CardDescription className="text-slate-400">
@@ -609,19 +609,19 @@ const ProfessionalDashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <Link href="/professional/jobs">
+            <Link href="/professional-dashboard/jobs">
               <Button className="w-full bg-cyan-600 hover:bg-cyan-700 text-white">
                 <Briefcase className="h-4 w-4 mr-2" />
                 Browse Jobs
               </Button>
             </Link>
-            <Link href="/professional/posts">
+            <Link href="/professional-dashboard/posts">
               <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                 <MessageSquare className="h-4 w-4 mr-2" />
                 View Posts
               </Button>
             </Link>
-            <Link href="/professional/resources">
+            <Link href="/professional-dashboard/resources">
               <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
                 <BookOpen className="h-4 w-4 mr-2" />
                 View Resources
@@ -629,7 +629,7 @@ const ProfessionalDashboard = () => {
             </Link>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   );
 };

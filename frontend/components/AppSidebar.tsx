@@ -187,14 +187,14 @@ export function AppSidebar({ user }: AppSidebarProps) {
                 alt={user.name}
               />
               <AvatarFallback className="bg-linear-to-br from-orange-500 to-red-500 text-white font-semibold">
-                {user.name.charAt(0).toUpperCase()}
+                {user?.name?.charAt(0)?.toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-white truncate">
-                {user.name}
+                {user?.name}
               </p>
-              <p className="text-xs text-slate-400 capitalize">{user.role}</p>
+              <p className="text-xs text-slate-400 capitalize">{user?.role}</p>
             </div>
             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
           </div>

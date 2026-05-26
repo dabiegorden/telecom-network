@@ -162,7 +162,7 @@ function AdminDashboardContent({ children }: { children: ReactNode }) {
                           alt={user.name}
                         />
                         <AvatarFallback className="bg-linear-to-br from-orange-500 to-red-500 text-white font-semibold">
-                          {user.name.charAt(0).toUpperCase()}
+                          {user?.name?.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <ChevronDown className="h-4 w-4 text-slate-400 hidden sm:block" />
@@ -180,7 +180,7 @@ function AdminDashboardContent({ children }: { children: ReactNode }) {
                             alt={user.name}
                           />
                           <AvatarFallback className="bg-linear-to-br from-orange-500 to-red-500 text-white font-semibold">
-                            {user.name.charAt(0).toUpperCase()}
+                            {user?.name?.charAt(0)?.toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col space-y-1">

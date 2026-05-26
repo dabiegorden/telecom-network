@@ -11,6 +11,18 @@ const getAuthHeaders = () => {
 // ─── Users API ────────────────────────────────────────────────────────────────
 
 export const usersApi = {
+  createUser: async (data: Record<string, any>) => {
+    const response = await fetch(`${API_URL}/auth/register`, {
+      method: "POST",
+      headers: {
+        ...getAuthHeaders(),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  },
+
   getAllUsers: async () => {
     const response = await fetch(`${API_URL}/users`, {
       headers: getAuthHeaders(),

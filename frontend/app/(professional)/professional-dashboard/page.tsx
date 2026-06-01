@@ -80,8 +80,7 @@ interface RecentResource {
   createdAt: string;
 }
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+const API = process.env.NEXT_PUBLIC_API_URL || "/api";
 
 const ProfessionalDashboard = () => {
   const [stats, setStats] = useState<DashboardStats>({
@@ -118,13 +117,13 @@ const ProfessionalDashboard = () => {
 
       // Fetch all data in parallel
       const [postsRes, resourcesRes, applicationsRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/posts?limit=5&sort=newest`, {
+        fetch(`${API}/posts?limit=5&sort=newest`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch(`${API_BASE_URL}/resources?limit=5`, {
+        fetch(`${API}/resources?limit=5`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch(`${API_BASE_URL}/applications/my-applications`, {
+        fetch(`${API}/applications/my-applications`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);

@@ -47,6 +47,8 @@ interface InternalJobsListProps {
   jobTypeFilter: string;
 }
 
+const API = process.env.NEXT_PUBLIC_API_URL || "/api";
+
 const InternalJobsList = ({
   searchQuery,
   locationFilter,
@@ -82,9 +84,7 @@ const InternalJobsList = ({
       if (jobTypeFilter && jobTypeFilter !== "all")
         params.append("jobType", jobTypeFilter);
 
-      const response = await fetch(
-        `http://localhost:5000/api/jobs?${params.toString()}`,
-      );
+      const response = await fetch(`${API}/jobs?${params.toString()}`);
       const data = await response.json();
 
       if (data.success) {

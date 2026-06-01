@@ -42,6 +42,8 @@ interface JobApplicationModalProps {
   onSuccess: () => void;
 }
 
+const API = process.env.NEXT_PUBLIC_API_URL || "/api";
+
 const JobApplicationModal = ({
   job,
   isOpen,
@@ -101,16 +103,13 @@ const JobApplicationModal = ({
         formData.append("resume", resumeFile);
       }
 
-      const response = await fetch(
-        `http://localhost:5000/api/applications/${job._id}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
+      const response = await fetch(`${API}/applications/${job._id}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      );
+        body: formData,
+      });
 
       const data = await response.json();
 

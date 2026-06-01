@@ -41,6 +41,8 @@ interface ExternalJobsListProps {
   locationFilter: string;
 }
 
+const API = process.env.NEXT_PUBLIC_API_URL || "/api";
+
 const ExternalJobsList = ({
   searchQuery,
   locationFilter,
@@ -64,7 +66,7 @@ const ExternalJobsList = ({
       });
 
       const response = await fetch(
-        `http://localhost:5000/api/jobs/external/preview?${params.toString()}`,
+        `${API}/jobs/external/preview?${params.toString()}`,
       );
       const data = await response.json();
 

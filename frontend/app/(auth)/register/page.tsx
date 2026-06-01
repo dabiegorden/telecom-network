@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+const API = process.env.NEXT_PUBLIC_API_URL || "/api";
+
 const RegisterPage = () => {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
@@ -84,7 +86,7 @@ const RegisterPage = () => {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/register", {
+      const response = await fetch(`${API}/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

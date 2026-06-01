@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+const API = process.env.NEXT_PUBLIC_API_URL || "/api";
 
 // Helper function to get auth headers
 const getAuthHeaders = () => {
@@ -12,7 +12,7 @@ const getAuthHeaders = () => {
 
 export const usersApi = {
   createUser: async (data: Record<string, any>) => {
-    const response = await fetch(`${API_URL}/auth/register`, {
+    const response = await fetch(`${API}/auth/register`, {
       method: "POST",
       headers: {
         ...getAuthHeaders(),
@@ -24,35 +24,35 @@ export const usersApi = {
   },
 
   getAllUsers: async () => {
-    const response = await fetch(`${API_URL}/users`, {
+    const response = await fetch(`${API}/users`, {
       headers: getAuthHeaders(),
     });
     return response.json();
   },
 
   getAllProfessionals: async () => {
-    const response = await fetch(`${API_URL}/users/professionals`, {
+    const response = await fetch(`${API}/users/professionals`, {
       headers: getAuthHeaders(),
     });
     return response.json();
   },
 
   getAllRecruiters: async () => {
-    const response = await fetch(`${API_URL}/users/recruiters`, {
+    const response = await fetch(`${API}/users/recruiters`, {
       headers: getAuthHeaders(),
     });
     return response.json();
   },
 
   getUserById: async (id: string) => {
-    const response = await fetch(`${API_URL}/users/${id}`, {
+    const response = await fetch(`${API}/users/${id}`, {
       headers: getAuthHeaders(),
     });
     return response.json();
   },
 
   updateUser: async (id: string, data: any) => {
-    const response = await fetch(`${API_URL}/users/${id}`, {
+    const response = await fetch(`${API}/users/${id}`, {
       method: "PUT",
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
@@ -61,7 +61,7 @@ export const usersApi = {
   },
 
   deleteUser: async (id: string) => {
-    const response = await fetch(`${API_URL}/users/${id}`, {
+    const response = await fetch(`${API}/users/${id}`, {
       method: "DELETE",
       headers: getAuthHeaders(),
     });
@@ -83,20 +83,20 @@ export const jobsApi = {
     const qs = params
       ? `?${new URLSearchParams(params as Record<string, string>).toString()}`
       : "";
-    const response = await fetch(`${API_URL}/jobs${qs}`);
+    const response = await fetch(`${API}/jobs${qs}`);
     return response.json();
   },
 
   // Get single job by ID
   getJobById: async (id: string) => {
-    const response = await fetch(`${API_URL}/jobs/${id}`);
+    const response = await fetch(`${API}/jobs/${id}`);
     return response.json();
   },
 
   // Create job (FormData for image upload, or plain object)
   createJob: async (data: FormData | Record<string, any>) => {
     const isFormData = data instanceof FormData;
-    const response = await fetch(`${API_URL}/jobs`, {
+    const response = await fetch(`${API}/jobs`, {
       method: "POST",
       headers: isFormData
         ? getAuthHeaders()
@@ -109,7 +109,7 @@ export const jobsApi = {
   // Update job
   updateJob: async (id: string, data: FormData | Record<string, any>) => {
     const isFormData = data instanceof FormData;
-    const response = await fetch(`${API_URL}/jobs/${id}`, {
+    const response = await fetch(`${API}/jobs/${id}`, {
       method: "PUT",
       headers: isFormData
         ? getAuthHeaders()
@@ -121,7 +121,7 @@ export const jobsApi = {
 
   // Delete job (also removes all related applications on the backend)
   deleteJob: async (id: string) => {
-    const response = await fetch(`${API_URL}/jobs/${id}`, {
+    const response = await fetch(`${API}/jobs/${id}`, {
       method: "DELETE",
       headers: getAuthHeaders(),
     });
@@ -136,7 +136,7 @@ export const jobsApi = {
     const qs = params
       ? `?${new URLSearchParams(params as Record<string, string>).toString()}`
       : "";
-    const response = await fetch(`${API_URL}/jobs/${jobId}/applications${qs}`, {
+    const response = await fetch(`${API}/jobs/${jobId}/applications${qs}`, {
       headers: getAuthHeaders(),
     });
     return response.json();
@@ -153,7 +153,7 @@ export const jobsApi = {
     const qs = params
       ? `?${new URLSearchParams(params as Record<string, string>).toString()}`
       : "";
-    const response = await fetch(`${API_URL}/jobs/sync-external${qs}`, {
+    const response = await fetch(`${API}/jobs/sync-external${qs}`, {
       method: "POST",
       headers: getAuthHeaders(),
     });
@@ -170,7 +170,7 @@ export const jobsApi = {
     const qs = params
       ? `?${new URLSearchParams(params as Record<string, string>).toString()}`
       : "";
-    const response = await fetch(`${API_URL}/jobs/external/preview${qs}`, {
+    const response = await fetch(`${API}/jobs/external/preview${qs}`, {
       headers: getAuthHeaders(),
     });
     return response.json();
@@ -186,7 +186,7 @@ export const applicationsApi = {
     data: FormData | { coverLetter?: string },
   ) => {
     const isFormData = data instanceof FormData;
-    const response = await fetch(`${API_URL}/applications/${jobId}`, {
+    const response = await fetch(`${API}/applications/${jobId}`, {
       method: "POST",
       headers: isFormData
         ? getAuthHeaders()
@@ -205,7 +205,7 @@ export const applicationsApi = {
     const qs = params
       ? `?${new URLSearchParams(params as Record<string, string>).toString()}`
       : "";
-    const response = await fetch(`${API_URL}/applications/my/all${qs}`, {
+    const response = await fetch(`${API}/applications/my/all${qs}`, {
       headers: getAuthHeaders(),
     });
     return response.json();
@@ -214,7 +214,7 @@ export const applicationsApi = {
   // User: withdraw (delete) their own application
   withdrawApplication: async (applicationId: string) => {
     const response = await fetch(
-      `${API_URL}/applications/${applicationId}/withdraw`,
+      `${API}/applications/${applicationId}/withdraw`,
       {
         method: "DELETE",
         headers: getAuthHeaders(),
@@ -233,7 +233,7 @@ export const applicationsApi = {
     const qs = params
       ? `?${new URLSearchParams(params as Record<string, string>).toString()}`
       : "";
-    const response = await fetch(`${API_URL}/applications/admin/all${qs}`, {
+    const response = await fetch(`${API}/applications/admin/all${qs}`, {
       headers: getAuthHeaders(),
     });
     return response.json();
@@ -246,7 +246,7 @@ export const applicationsApi = {
     notes?: string,
   ) => {
     const response = await fetch(
-      `${API_URL}/applications/${applicationId}/status`,
+      `${API}/applications/${applicationId}/status`,
       {
         method: "PATCH",
         headers: {
@@ -267,7 +267,7 @@ export const applicationsApi = {
 
 export const authApi = {
   login: async (email: string, password: string) => {
-    const response = await fetch(`${API_URL}/auth/login`, {
+    const response = await fetch(`${API}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -276,7 +276,7 @@ export const authApi = {
   },
 
   register: async (data: any) => {
-    const response = await fetch(`${API_URL}/auth/register`, {
+    const response = await fetch(`${API}/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),

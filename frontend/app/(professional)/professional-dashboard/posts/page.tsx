@@ -102,8 +102,7 @@ interface Comment {
   createdAt: string;
 }
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+const API = process.env.NEXT_PUBLIC_API_URL || "/api";
 
 const CATEGORIES = [
   "All",
@@ -169,7 +168,7 @@ const ProfessionalPostsPage = () => {
         params.append("search", searchQuery);
       }
 
-      const response = await fetch(`${API_BASE_URL}/posts?${params}`);
+      const response = await fetch(`${API}/posts?${params}`);
       const data = await response.json();
 
       if (data.success) {
@@ -187,7 +186,7 @@ const ProfessionalPostsPage = () => {
   const handleLikePost = async (postId: string) => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`${API_BASE_URL}/posts/${postId}/like`, {
+      const response = await fetch(`${API}/posts/${postId}/like`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -240,7 +239,7 @@ const ProfessionalPostsPage = () => {
   const fetchComments = async (postId: string) => {
     try {
       setLoadingComments(true);
-      const response = await fetch(`${API_BASE_URL}/posts/${postId}/comments`);
+      const response = await fetch(`${API}/posts/${postId}/comments`);
       const data = await response.json();
 
       if (data.success) {
@@ -256,7 +255,7 @@ const ProfessionalPostsPage = () => {
   const fetchReplies = async (postId: string, commentId: string) => {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/posts/${postId}/comments/${commentId}/replies`,
+        `${API}/posts/${postId}/comments/${commentId}/replies`,
       );
       const data = await response.json();
 
@@ -302,7 +301,7 @@ const ProfessionalPostsPage = () => {
       }
 
       const response = await fetch(
-        `${API_BASE_URL}/posts/${selectedPost?._id}/comments`,
+        `${API}/posts/${selectedPost?._id}/comments`,
         {
           method: "POST",
           headers: {
@@ -342,7 +341,7 @@ const ProfessionalPostsPage = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `${API_BASE_URL}/posts/${selectedPost?._id}/comments/${commentId}/like`,
+        `${API}/posts/${selectedPost?._id}/comments/${commentId}/like`,
         {
           method: "POST",
           headers: {

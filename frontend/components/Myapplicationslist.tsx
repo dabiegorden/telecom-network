@@ -59,6 +59,8 @@ interface Application {
   updatedAt: string;
 }
 
+const API = process.env.NEXT_PUBLIC_API_URL || "/api";
+
 const MyApplicationsList = () => {
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,7 +93,7 @@ const MyApplicationsList = () => {
       }
 
       const response = await fetch(
-        `http://localhost:5000/api/applications/my/all?${params.toString()}`,
+        `${API}/applications/my/all?${params.toString()}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -121,15 +123,12 @@ const MyApplicationsList = () => {
     setIsDeleting(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(
-        `http://localhost:5000/api/applications/${deleteId}/withdraw`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      const response = await fetch(`${API}/applications/${deleteId}/withdraw`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
 
       const data = await response.json();
 

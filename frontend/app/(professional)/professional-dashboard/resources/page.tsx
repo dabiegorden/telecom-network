@@ -50,6 +50,8 @@ interface Resource {
   updatedAt: string;
 }
 
+const API = process.env.NEXT_PUBLIC_API_URL || "/api";
+
 const ProfessionalResourcesPage = () => {
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
@@ -75,9 +77,7 @@ const ProfessionalResourcesPage = () => {
       if (fileTypeFilter && fileTypeFilter !== "all")
         params.append("fileType", fileTypeFilter);
 
-      const response = await fetch(
-        `http://localhost:5000/api/resources?${params.toString()}`,
-      );
+      const response = await fetch(`${API}/resources?${params.toString()}`);
       const data = await response.json();
 
       if (data.success) {

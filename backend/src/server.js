@@ -57,12 +57,12 @@ app.get("/", (_req, res) => {
 // API Routes
 // =======================
 
-app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/posts", postRoutes);
-app.use("/api/jobs", jobRoutes);
-app.use("/api/applications", applicationRoutes);
-app.use("/api/resources", resourceRoutes);
+app.use("/auth", authRoutes);
+app.use("/users", userRoutes);
+app.use("/posts", postRoutes);
+app.use("/jobs", jobRoutes);
+app.use("/applications", applicationRoutes);
+app.use("/resources", resourceRoutes);
 
 // =======================
 // 404 Handler

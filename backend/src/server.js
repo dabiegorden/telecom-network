@@ -16,7 +16,7 @@ import connectDB from "./config/db.js";
 const app = express();
 
 // Create temporary upload directory
-const uploadDir = path.join(process.cwd(), "tmp/uploads");
+const uploadDir = "/tmp/uploads";
 fs.mkdirSync(uploadDir, { recursive: true });
 
 // =======================

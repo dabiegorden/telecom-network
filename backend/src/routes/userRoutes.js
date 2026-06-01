@@ -1,5 +1,4 @@
 import express from "express";
-import multer from "multer";
 import {
   getCurrentUser,
   updateCurrentUser,
@@ -15,8 +14,21 @@ import { checkRole } from "../middleware/roleMiddleware.js";
 
 const router = express.Router();
 
-// Configure multer for file uploads
-const upload = multer({ dest: "uploads/" });
+import multer from "multer";
+import path from "path";
+
+// Configure multer for Vercel temporary storage
+const storage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, "/tmp/uploads");
+  },
+
+  filename: (_req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({ storage });
 
 // @route   GET /api/users/me
 // @desc    Get current user profile

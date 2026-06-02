@@ -250,29 +250,37 @@ export const updateUserByAdmin = async (req, res) => {
       location,
     } = req.body;
 
-    const user = await User.findById(req.params.id);
+    const updateData = {};
 
-    if (!user) {
+    if (name !== undefined) updateData.name = name;
+    if (email !== undefined) updateData.email = email;
+    if (role !== undefined) updateData.role = role;
+    if (specialization !== undefined)
+      updateData.specialization = specialization;
+
+    if (experience !== undefined) updateData.experience = experience;
+
+    if (skills !== undefined) updateData.skills = skills;
+
+    if (bio !== undefined) updateData.bio = bio;
+
+    if (location !== undefined) updateData.location = location;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      {
+        new: true,
+        runValidators: true,
+      },
+    ).select("-password");
+
+    if (!updatedUser) {
       return res.status(404).json({
         success: false,
         message: "User not found.",
       });
     }
-
-    // Update fields
-    if (name) user.name = name;
-    if (email) user.email = email;
-    if (role) user.role = role;
-    if (specialization) user.specialization = specialization;
-    if (experience !== undefined) user.experience = experience;
-    if (skills) user.skills = skills;
-    if (bio) user.bio = bio;
-    if (location) user.location = location;
-
-    await user.save();
-
-    // Return user without password
-    const updatedUser = await User.findById(user._id).select("-password");
 
     res.status(200).json({
       success: true,
@@ -281,10 +289,10 @@ export const updateUserByAdmin = async (req, res) => {
     });
   } catch (error) {
     console.error("Update user by admin error:", error);
+
     res.status(500).json({
       success: false,
-      message: "Server error updating user.",
-      error: error.message,
+      message: error.message,
     });
   }
 };

@@ -321,24 +321,24 @@ const ProfessionalResourcesPage = () => {
                 <div className="p-6 space-y-4">
                   {/* Title */}
                   <h3 className="text-lg font-bold text-white line-clamp-2 group-hover:text-cyan-400 transition-colors">
-                    {resource.title}
+                    {resource?.title}
                   </h3>
 
                   {/* Description */}
                   <p className="text-sm text-slate-400 line-clamp-2">
-                    {resource.description}
+                    {resource?.description}
                   </p>
 
                   {/* Meta Info */}
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-xs text-slate-400">
                       <User className="h-3 w-3 text-cyan-400" />
-                      <span>{resource.uploadedBy.name}</span>
-                      {resource.uploadedBy.specialization && (
+                      <span>{resource?.uploadedBy?.name}</span>
+                      {resource?.uploadedBy?.specialization && (
                         <>
                           <span>•</span>
                           <span className="text-cyan-400">
-                            {resource.uploadedBy.specialization}
+                            {resource?.uploadedBy?.specialization}
                           </span>
                         </>
                       )}
@@ -358,7 +358,7 @@ const ProfessionalResourcesPage = () => {
                     {/* File Name */}
                     <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-800/30 rounded-lg p-2">
                       <FileText className="h-3 w-3 shrink-0" />
-                      <span className="truncate">{resource.fileName}</span>
+                      <span className="truncate">{resource?.fileName}</span>
                     </div>
                   </div>
 

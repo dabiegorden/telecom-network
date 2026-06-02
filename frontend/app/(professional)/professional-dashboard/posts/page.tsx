@@ -502,25 +502,25 @@ const ProfessionalPostsPage = () => {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-3 flex-1">
                     <Avatar className="h-10 w-10 border-2 border-cyan-500">
-                      <AvatarImage
+                      {/* <AvatarImage
                         src={post.author.profileImage}
                         alt={post.author.name}
-                      />
+                      /> */}
                       <AvatarFallback className="bg-linear-to-br from-cyan-500 to-blue-500 text-white font-semibold">
-                        {post.author.name.charAt(0).toUpperCase()}
+                        {post?.author?.name?.charAt(0)?.toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="font-semibold text-white">
-                          {post.author.name}
+                          {post?.author?.name}
                         </h3>
-                        {post.author.specialization && (
+                        {post?.author?.specialization && (
                           <Badge
                             variant="outline"
                             className="text-xs bg-slate-700/50 text-slate-300 border-slate-600"
                           >
-                            {post.author.specialization}
+                            {post?.author?.specialization}
                           </Badge>
                         )}
                         {post.isPinned && (
@@ -700,41 +700,41 @@ const ProfessionalPostsPage = () => {
                   <div className="bg-slate-800/50 rounded-lg p-4">
                     <div className="flex items-start gap-3">
                       <Avatar className="h-8 w-8 border-2 border-cyan-500">
-                        <AvatarImage
+                        {/* <AvatarImage
                           src={comment.user.profileImage}
                           alt={comment.user.name}
-                        />
+                        /> */}
                         <AvatarFallback className="bg-linear-to-br from-cyan-500 to-blue-500 text-white text-xs font-semibold">
-                          {comment.user.name.charAt(0).toUpperCase()}
+                          {comment?.user?.name?.charAt(0)?.toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="font-semibold text-sm">
-                            {comment.user.name}
+                            {comment?.user?.name}
                           </span>
                           <span className="text-xs text-slate-400">
-                            {formatDistanceToNow(new Date(comment.createdAt), {
+                            {formatDistanceToNow(new Date(comment?.createdAt), {
                               addSuffix: true,
                             })}
                           </span>
                         </div>
                         <p className="text-slate-300 text-sm whitespace-pre-wrap">
-                          {comment.content}
+                          {comment?.content}
                         </p>
 
                         {/* Comment Attachment */}
-                        {comment.attachmentUrl && (
+                        {comment?.attachmentUrl && (
                           <div className="mt-2 bg-slate-900/50 border border-slate-700 rounded-lg p-2">
                             <div className="flex items-center gap-2">
-                              {getAttachmentIcon(comment.attachmentType)}
+                              {getAttachmentIcon(comment?.attachmentType)}
                               <a
-                                href={comment.attachmentUrl}
+                                href={comment?.attachmentUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-xs text-cyan-400 hover:text-cyan-300 flex-1 truncate"
                               >
-                                {comment.attachmentName}
+                                {comment?.attachmentName}
                               </a>
                             </div>
                           </div>
@@ -743,33 +743,33 @@ const ProfessionalPostsPage = () => {
                         {/* Comment Actions */}
                         <div className="flex items-center gap-3 mt-2">
                           <button
-                            onClick={() => handleLikeComment(comment._id)}
+                            onClick={() => handleLikeComment(comment?._id)}
                             className="text-xs text-slate-400 hover:text-red-400 flex items-center gap-1"
                           >
                             <Heart className="h-3 w-3" />
-                            {comment.likeCount}
+                            {comment?.likeCount}
                           </button>
                           <button
-                            onClick={() => setReplyingTo(comment._id)}
+                            onClick={() => setReplyingTo(comment?._id)}
                             className="text-xs text-slate-400 hover:text-cyan-400 flex items-center gap-1"
                           >
                             <Reply className="h-3 w-3" />
                             Reply
                           </button>
-                          {comment.replyCount > 0 && (
+                          {comment?.replyCount > 0 && (
                             <button
                               onClick={() =>
-                                toggleReplies(comment._id, selectedPost!._id)
+                                toggleReplies(comment?._id, selectedPost!._id)
                               }
                               className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
                             >
-                              {expandedComments.has(comment._id) ? (
+                              {expandedComments.has(comment?._id) ? (
                                 <ChevronUp className="h-3 w-3" />
                               ) : (
                                 <ChevronDown className="h-3 w-3" />
                               )}
-                              {comment.replyCount}{" "}
-                              {comment.replyCount === 1 ? "reply" : "replies"}
+                              {comment?.replyCount}{" "}
+                              {comment?.replyCount === 1 ? "reply" : "replies"}
                             </button>
                           )}
                         </div>

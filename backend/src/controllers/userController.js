@@ -239,6 +239,11 @@ export const getAllRecruiters = async (req, res) => {
  */
 export const updateUserByAdmin = async (req, res) => {
   try {
+    console.log("========== ADMIN UPDATE ==========");
+    console.log("PARAM ID:", req.params.id);
+    console.log("BODY:", req.body);
+    console.log("HEADERS:", req.headers["content-type"]);
+
     const {
       name,
       email,
@@ -248,39 +253,29 @@ export const updateUserByAdmin = async (req, res) => {
       skills,
       bio,
       location,
-    } = req.body;
+    } = req.body || {};
 
-    const updateData = {};
+    const user = await User.findById(req.params.id);
 
-    if (name !== undefined) updateData.name = name;
-    if (email !== undefined) updateData.email = email;
-    if (role !== undefined) updateData.role = role;
-    if (specialization !== undefined)
-      updateData.specialization = specialization;
-
-    if (experience !== undefined) updateData.experience = experience;
-
-    if (skills !== undefined) updateData.skills = skills;
-
-    if (bio !== undefined) updateData.bio = bio;
-
-    if (location !== undefined) updateData.location = location;
-
-    const updatedUser = await User.findByIdAndUpdate(
-      req.params.id,
-      updateData,
-      {
-        new: true,
-        runValidators: true,
-      },
-    ).select("-password");
-
-    if (!updatedUser) {
+    if (!user) {
       return res.status(404).json({
         success: false,
         message: "User not found.",
       });
     }
+
+    if (name) user.name = name;
+    if (email) user.email = email;
+    if (role) user.role = role;
+    if (specialization) user.specialization = specialization;
+    if (experience !== undefined) user.experience = experience;
+    if (skills) user.skills = skills;
+    if (bio) user.bio = bio;
+    if (location) user.location = location;
+
+    await user.save();
+
+    const updatedUser = await User.findById(user._id).select("-password");
 
     res.status(200).json({
       success: true,
@@ -288,7 +283,7 @@ export const updateUserByAdmin = async (req, res) => {
       data: updatedUser,
     });
   } catch (error) {
-    console.error("Update user by admin error:", error);
+    console.error("UPDATE USER ERROR:", error);
 
     res.status(500).json({
       success: false,

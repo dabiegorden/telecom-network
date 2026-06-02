@@ -574,7 +574,7 @@ const ProfessionalDashboard = () => {
                         {resource.title}
                       </h3>
                       <p className="text-xs text-slate-400 mb-2">
-                        by {resource.uploadedBy.name}
+                        by {resource?.uploadedBy?.name}
                       </p>
                       <div className="flex items-center gap-2">
                         <Badge

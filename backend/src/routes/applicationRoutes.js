@@ -38,6 +38,8 @@ router.post("/:jobId", verifyToken, uploadResume.single("resume"), applyToJob);
 router.get("/my/all", verifyToken, getMyApplications);
 router.delete("/:id/withdraw", verifyToken, withdrawApplication);
 
+//my-applications
+router.get("/my-applications", verifyToken, getMyApplications);
 // Admin routes
 router.get("/admin/all", verifyToken, checkRole("admin"), getAllApplications);
 router.patch("/:id/status", verifyToken, updateApplicationStatus);

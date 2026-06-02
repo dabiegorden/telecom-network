@@ -182,10 +182,10 @@ export function AppSidebar({ user }: AppSidebarProps) {
         {user && (
           <div className="flex items-center gap-3 px-2 py-3 bg-slate-800/30 rounded-lg">
             <Avatar className="h-10 w-10 border-2 border-cyan-500">
-              <AvatarImage
+              {/* <AvatarImage
                 src={user.profileImage || "/placeholder.svg"}
                 alt={user.name}
-              />
+              /> */}
               <AvatarFallback className="bg-linear-to-br from-orange-500 to-red-500 text-white font-semibold">
                 {user?.name?.charAt(0)?.toUpperCase()}
               </AvatarFallback>

@@ -159,10 +159,10 @@ function RecruiterDashboardContent({ children }: { children: ReactNode }) {
                   <DropdownMenuTrigger className="outline-none">
                     <div className="flex items-center gap-2 rounded-lg hover:bg-slate-800 transition-colors p-1 cursor-pointer">
                       <Avatar className="h-9 w-9 border-2 border-cyan-500">
-                        <AvatarImage
+                        {/* <AvatarImage
                           src={user.profileImage || "/placeholder.svg"}
                           alt={user.name}
-                        />
+                        /> */}
                         <AvatarFallback className="bg-linear-to-br from-orange-500 to-red-500 text-white font-semibold">
                           {user.name.charAt(0).toUpperCase()}
                         </AvatarFallback>
@@ -177,10 +177,10 @@ function RecruiterDashboardContent({ children }: { children: ReactNode }) {
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex items-center gap-3 p-2">
                         <Avatar className="h-12 w-12 border-2 border-cyan-500">
-                          <AvatarImage
+                          {/* <AvatarImage
                             src={user.profileImage || "/placeholder.svg"}
                             alt={user.name}
-                          />
+                          /> */}
                           <AvatarFallback className="bg-linear-to-br from-orange-500 to-red-500 text-white font-semibold">
                             {user.name.charAt(0).toUpperCase()}
                           </AvatarFallback>

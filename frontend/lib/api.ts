@@ -54,9 +54,13 @@ export const usersApi = {
   updateUser: async (id: string, data: any) => {
     const response = await fetch(`${API}/users/${id}`, {
       method: "PUT",
-      headers: getAuthHeaders(),
+      headers: {
+        ...getAuthHeaders(),
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(data),
     });
+
     return response.json();
   },
 

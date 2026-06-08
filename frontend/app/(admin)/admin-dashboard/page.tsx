@@ -251,7 +251,7 @@ export default function AdminDashboardPage() {
                     outerRadius={90}
                     innerRadius={50}
                     paddingAngle={3}
-                    label={({ status, percent }) => `${status} ${(percent * 100).toFixed(0)}%`}
+                    label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
                     labelLine={false}
                   >
                     {data.applicationsByStatus.map((entry, index) => (

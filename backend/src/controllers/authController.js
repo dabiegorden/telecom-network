@@ -1,6 +1,8 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import Notification from "../models/Notification.js";
+import { sendEmail, welcomeEmailTemplate } from "../utils/sendEmail.js";
 
 /**
  * Generate JWT token
@@ -79,6 +81,22 @@ export const register = async (req, res) => {
 
     // Generate token
     const token = generateToken(user._id);
+
+    // Create a persistent welcome notification
+    await Notification.create({
+      user: user._id,
+      type: "welcome",
+      title: "Welcome to TelecomNet Ghana!",
+      message: `Hi ${user.name}, your account has been created successfully. Complete your profile to start connecting with telecom professionals across Ghana.`,
+      link: "/profile",
+    });
+
+    // Send welcome email (non-blocking — failure should not break registration)
+    sendEmail({
+      to: user.email,
+      subject: "Welcome to TelecomNet Ghana!",
+      html: welcomeEmailTemplate(user.name),
+    }).catch((error) => console.error("Welcome email error:", error));
 
     res.status(201).json({
       success: true,

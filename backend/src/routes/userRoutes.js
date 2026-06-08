@@ -41,7 +41,10 @@ router.get("/me", verifyToken, getCurrentUser);
 router.put(
   "/me",
   verifyToken,
-  upload.single("profileImage"),
+  upload.fields([
+    { name: "profileImage", maxCount: 1 },
+    { name: "bannerImage", maxCount: 1 },
+  ]),
   updateCurrentUser,
 );
 

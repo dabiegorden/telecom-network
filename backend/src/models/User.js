@@ -44,11 +44,28 @@ const userSchema = new mongoose.Schema(
       type: String,
       maxlength: [500, "Bio cannot exceed 500 characters"],
     },
+    headline: {
+      type: String,
+      trim: true,
+      maxlength: [120, "Headline cannot exceed 120 characters"],
+    },
     location: {
       type: String,
       trim: true,
     },
+    website: {
+      type: String,
+      trim: true,
+    },
+    phone: {
+      type: String,
+      trim: true,
+    },
     profileImage: {
+      type: String,
+      default: "",
+    },
+    bannerImage: {
       type: String,
       default: "",
     },

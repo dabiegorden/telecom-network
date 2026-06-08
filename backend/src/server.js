@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import fs from "fs";
 import path from "path";
+import { createServer } from "http";
 
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
@@ -10,10 +11,16 @@ import postRoutes from "./routes/postRoutes.js";
 import jobRoutes from "./routes/jobRoutes.js";
 import applicationRoutes from "./routes/applicationRoutes.js";
 import resourceRoutes from "./routes/resourceRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
+import connectionRoutes from "./routes/connectionRoutes.js";
+import messageRoutes from "./routes/messageRoutes.js";
 
 import connectDB from "./config/db.js";
+import { initSocket } from "./socket.js";
 
 const app = express();
+const httpServer = createServer(app);
+initSocket(httpServer);
 
 // Create temporary upload directory
 const uploadDir = "/tmp/uploads";
@@ -63,6 +70,9 @@ app.use("/posts", postRoutes);
 app.use("/jobs", jobRoutes);
 app.use("/applications", applicationRoutes);
 app.use("/resources", resourceRoutes);
+app.use("/notifications", notificationRoutes);
+app.use("/connections", connectionRoutes);
+app.use("/messages", messageRoutes);
 
 // =======================
 // 404 Handler
@@ -95,7 +105,7 @@ app.use((err, _req, res, _next) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 

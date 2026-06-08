@@ -38,8 +38,12 @@ export const updateCurrentUser = async (req, res) => {
       experience,
       skills,
       bio,
+      headline,
       location,
+      website,
+      phone,
       password,
+      currentPassword,
     } = req.body;
 
     const user = await User.findById(req.user._id);
@@ -55,23 +59,59 @@ export const updateCurrentUser = async (req, res) => {
     if (name) user.name = name;
     if (specialization) user.specialization = specialization;
     if (experience !== undefined) user.experience = experience;
-    if (skills) user.skills = skills;
-    if (bio) user.bio = bio;
-    if (location) user.location = location;
+    if (skills) {
+      user.skills = Array.isArray(skills)
+        ? skills
+        : skills
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean);
+    }
+    if (bio !== undefined) user.bio = bio;
+    if (headline !== undefined) user.headline = headline;
+    if (location !== undefined) user.location = location;
+    if (website !== undefined) user.website = website;
+    if (phone !== undefined) user.phone = phone;
 
-    // Update password if provided
+    // Update password if provided (requires verifying the current password)
     if (password) {
+      if (!currentPassword) {
+        return res.status(400).json({
+          success: false,
+          message: "Current password is required to set a new password.",
+        });
+      }
+
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!isMatch) {
+        return res.status(400).json({
+          success: false,
+          message: "Current password is incorrect.",
+        });
+      }
+
       const salt = await bcrypt.genSalt(10);
       user.password = await bcrypt.hash(password, salt);
     }
 
     // Handle profile image upload if file exists
-    if (req.file) {
+    const profileImageFile = req.files?.profileImage?.[0] || req.file;
+    if (profileImageFile) {
       const result = await uploadToCloudinary(
-        req.file.path,
+        profileImageFile.path,
         "telecom-network/profiles",
       );
       user.profileImage = result.url;
+    }
+
+    // Handle banner image upload if file exists
+    const bannerImageFile = req.files?.bannerImage?.[0];
+    if (bannerImageFile) {
+      const result = await uploadToCloudinary(
+        bannerImageFile.path,
+        "telecom-network/banners",
+      );
+      user.bannerImage = result.url;
     }
 
     await user.save();

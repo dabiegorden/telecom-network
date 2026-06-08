@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, useInView, easeInOut } from 'framer-motion';
-import { Target, Eye, Award, Zap } from 'lucide-react';
+import { Target, Eye, Award, Zap, Search, LayoutGrid, Wrench, ShieldCheck } from 'lucide-react';
 
 const About = () => {
   const ref = useRef(null);
@@ -54,6 +54,29 @@ const About = () => {
       title: 'Our Impact',
       description: 'Empowering over 2,500 professionals with opportunities for growth, learning, and career advancement in Ghana\'s dynamic telecommunications sector.',
       gradient: 'from-pink-500 to-cyan-500',
+    },
+  ];
+
+  const objectives = [
+    {
+      icon: Search,
+      number: '01',
+      description: "To analyze the networking needs of telecommunication professionals in Ghana.",
+    },
+    {
+      icon: LayoutGrid,
+      number: '02',
+      description: 'To design a user-friendly digital platform that supports communication, collaboration, and resource sharing.',
+    },
+    {
+      icon: Wrench,
+      number: '03',
+      description: 'To implement core features such as user profiles, discussion forums, messaging, job postings, and knowledge-sharing modules.',
+    },
+    {
+      icon: ShieldCheck,
+      number: '04',
+      description: 'To ensure data security, authentication, and proper user management.',
     },
   ];
 
@@ -121,6 +144,48 @@ const About = () => {
                 <div className={`absolute top-0 right-0 w-20 h-20 bg-linear-to-br ${value.gradient} opacity-10 blur-2xl group-hover:opacity-20 transition-opacity`} />
               </motion.div>
             ))}
+          </motion.div>
+
+          {/* Aims & Objectives Section */}
+          <motion.div
+            id="objectives"
+            variants={itemVariants}
+            className="mt-20 bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-2xl p-8 md:p-12"
+          >
+            <div className="text-center mb-10">
+              <div className="inline-block mb-4">
+                <span className="px-4 py-2 bg-cyan-500/10 border border-cyan-500/30 rounded-full text-cyan-400 text-sm font-semibold">
+                  Aims &amp; Objectives
+                </span>
+              </div>
+              <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                What This Project Sets Out to Achieve
+              </h3>
+              <p className="text-lg text-slate-300 max-w-3xl mx-auto">
+                TelecomNet Ghana was developed to bridge the networking gap among telecom
+                professionals in Ghana. The project is guided by the following objectives:
+              </p>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-6">
+              {objectives.map((objective) => (
+                <div
+                  key={objective.number}
+                  className="flex items-start gap-4 bg-slate-950/50 border border-slate-800 rounded-xl p-6 hover:border-cyan-500/40 transition-colors"
+                >
+                  <div className="shrink-0 inline-flex items-center justify-center w-12 h-12 rounded-xl bg-linear-to-br from-cyan-500 to-blue-500">
+                    <objective.icon className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <span className="text-cyan-400 text-sm font-bold tracking-wider">
+                      OBJECTIVE {objective.number}
+                    </span>
+                    <p className="text-slate-200 leading-relaxed mt-1">
+                      {objective.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </motion.div>
 
           {/* Why Choose Us Section */}

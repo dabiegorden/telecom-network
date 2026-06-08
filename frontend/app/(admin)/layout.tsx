@@ -28,6 +28,7 @@ import { Bell, Settings, LogOut, User, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import NotificationBell from "@/components/NotificationBell";
 import { AppSidebar } from "@/constants";
 
 function AdminDashboardContent({ children }: { children: ReactNode }) {
@@ -124,14 +125,7 @@ function AdminDashboardContent({ children }: { children: ReactNode }) {
           <div className="ml-auto flex items-center gap-2 px-4">
             {/* Desktop Actions */}
             <div className="hidden sm:flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-slate-300 hover:bg-slate-800 hover:text-white transition-all duration-200 rounded-lg relative"
-              >
-                <Bell className="h-5 w-5" />
-                <span className="absolute -top-1 -right-1 h-2 w-2 bg-linear-to-r from-cyan-500 to-blue-500 rounded-full animate-pulse"></span>
-              </Button>
+              <NotificationBell />
               <Button
                 variant="ghost"
                 size="icon"
@@ -157,10 +151,10 @@ function AdminDashboardContent({ children }: { children: ReactNode }) {
                   <DropdownMenuTrigger className="outline-none">
                     <div className="flex items-center gap-2 rounded-lg hover:bg-slate-800 transition-colors p-1 cursor-pointer">
                       <Avatar className="h-9 w-9 border-2 border-cyan-500">
-                        {/* <AvatarImage
-                          src={user.profileImage || "/placeholder.svg"}
+                        <AvatarImage
+                          src={user.profileImage || undefined}
                           alt={user.name}
-                        /> */}
+                          />
                         <AvatarFallback className="bg-linear-to-br from-orange-500 to-red-500 text-white font-semibold">
                           {user?.name?.charAt(0).toUpperCase()}
                         </AvatarFallback>
@@ -175,10 +169,10 @@ function AdminDashboardContent({ children }: { children: ReactNode }) {
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex items-center gap-3 p-2">
                         <Avatar className="h-12 w-12 border-2 border-cyan-500">
-                          {/* <AvatarImage
-                            src={user.profileImage || "/placeholder.svg"}
+                          <AvatarImage
+                            src={user.profileImage || undefined}
                             alt={user.name}
-                          /> */}
+                            />
                           <AvatarFallback className="bg-linear-to-br from-orange-500 to-red-500 text-white font-semibold">
                             {user?.name?.charAt(0)?.toUpperCase()}
                           </AvatarFallback>
@@ -206,16 +200,32 @@ function AdminDashboardContent({ children }: { children: ReactNode }) {
                         <Bell className="mr-2 h-4 w-4" />
                         <span>Notifications</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer text-slate-300 focus:text-white focus:bg-slate-800">
+                      <DropdownMenuItem
+                        onClick={() =>
+                          router.push("/admin-dashboard/settings")
+                        }
+                        className="cursor-pointer text-slate-300 focus:text-white focus:bg-slate-800"
+                      >
                         <Settings className="mr-2 h-4 w-4" />
                         <span>Settings</span>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator className="bg-slate-800" />
                     </div>
 
-                    <DropdownMenuItem className="cursor-pointer text-slate-300 focus:text-white focus:bg-slate-800">
+                    <DropdownMenuItem
+                      onClick={() => router.push("/admin-dashboard/profile")}
+                      className="cursor-pointer text-slate-300 focus:text-white focus:bg-slate-800"
+                    >
                       <User className="mr-2 h-4 w-4" />
                       <span>Profile Settings</span>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      onClick={() => router.push("/admin-dashboard/settings")}
+                      className="hidden sm:flex cursor-pointer text-slate-300 focus:text-white focus:bg-slate-800"
+                    >
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Account Settings</span>
                     </DropdownMenuItem>
 
                     <DropdownMenuSeparator className="bg-slate-800" />

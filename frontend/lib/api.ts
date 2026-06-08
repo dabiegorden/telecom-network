@@ -23,6 +23,27 @@ export const usersApi = {
     return response.json();
   },
 
+  getCurrentUser: async () => {
+    const response = await fetch(`${API}/users/me`, {
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  // data: plain object for JSON update, or FormData when uploading profileImage/bannerImage
+  updateCurrentUser: async (data: Record<string, any> | FormData) => {
+    const isFormData = data instanceof FormData;
+    const response = await fetch(`${API}/users/me`, {
+      method: "PUT",
+      headers: {
+        ...getAuthHeaders(),
+        ...(isFormData ? {} : { "Content-Type": "application/json" }),
+      },
+      body: isFormData ? data : JSON.stringify(data),
+    });
+    return response.json();
+  },
+
   getAllUsers: async () => {
     const response = await fetch(`${API}/users`, {
       headers: getAuthHeaders(),
@@ -284,6 +305,146 @@ export const authApi = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
+    });
+    return response.json();
+  },
+};
+
+// ─── Notifications API ────────────────────────────────────────────────────────
+
+export const notificationsApi = {
+  getMyNotifications: async () => {
+    const response = await fetch(`${API}/notifications`, {
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  markAsRead: async (id: string) => {
+    const response = await fetch(`${API}/notifications/${id}/read`, {
+      method: "PUT",
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  markAllAsRead: async () => {
+    const response = await fetch(`${API}/notifications/read-all`, {
+      method: "PUT",
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  deleteNotification: async (id: string) => {
+    const response = await fetch(`${API}/notifications/${id}`, {
+      method: "DELETE",
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+};
+
+// ─── Connections API ──────────────────────────────────────────────────────────
+
+export const connectionsApi = {
+  getMyConnections: async () => {
+    const response = await fetch(`${API}/connections`, {
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  getDiscoverableUsers: async () => {
+    const response = await fetch(`${API}/connections/discover`, {
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  getPendingRequests: async () => {
+    const response = await fetch(`${API}/connections/requests`, {
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  getConnectionStatus: async (userId: string) => {
+    const response = await fetch(`${API}/connections/status/${userId}`, {
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  sendRequest: async (userId: string) => {
+    const response = await fetch(`${API}/connections/request/${userId}`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  respondToRequest: async (id: string, action: "accepted" | "declined") => {
+    const response = await fetch(`${API}/connections/${id}/respond`, {
+      method: "PUT",
+      headers: {
+        ...getAuthHeaders(),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ action }),
+    });
+    return response.json();
+  },
+
+  removeConnection: async (id: string) => {
+    const response = await fetch(`${API}/connections/${id}`, {
+      method: "DELETE",
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+};
+
+// ─── Messages API ─────────────────────────────────────────────────────────────
+
+export const messagesApi = {
+  getConversations: async () => {
+    const response = await fetch(`${API}/messages/conversations`, {
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  getOrCreateConversationWithUser: async (userId: string) => {
+    const response = await fetch(`${API}/messages/conversations/with/${userId}`, {
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  getMessages: async (conversationId: string) => {
+    const response = await fetch(`${API}/messages/conversations/${conversationId}`, {
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  sendMessage: async (conversationId: string, content: string) => {
+    const response = await fetch(`${API}/messages/conversations/${conversationId}`, {
+      method: "POST",
+      headers: {
+        ...getAuthHeaders(),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ content }),
+    });
+    return response.json();
+  },
+
+  markConversationAsRead: async (conversationId: string) => {
+    const response = await fetch(`${API}/messages/conversations/${conversationId}/read`, {
+      method: "PUT",
+      headers: getAuthHeaders(),
     });
     return response.json();
   },

@@ -18,6 +18,7 @@ import {
   Briefcase,
   BookOpen,
   MessageSquare,
+  MessageCircle,
   Wifi,
 } from "lucide-react";
 import Link from "next/link";
@@ -32,6 +33,16 @@ const menuItems = [
         title: "Dashboard",
         url: "/recruiter-dashboard",
         icon: LayoutDashboard,
+      },
+      {
+        title: "Connections",
+        url: "/recruiter-dashboard/connections",
+        icon: Users,
+      },
+      {
+        title: "Messages",
+        url: "/recruiter-dashboard/messages",
+        icon: MessageCircle,
       },
     ],
   },
@@ -130,10 +141,10 @@ export function RecruiterSidebar({ user }: AppSidebarProps) {
         {user && (
           <div className="flex items-center gap-3 px-2 py-3 bg-slate-800/30 rounded-lg">
             <Avatar className="h-10 w-10 border-2 border-cyan-500">
-              {/* <AvatarImage
-                src={user.profileImage || "/placeholder.svg"}
+              <AvatarImage
+                src={user.profileImage || undefined}
                 alt={user.name}
-              /> */}
+                />
               <AvatarFallback className="bg-linear-to-br from-orange-500 to-red-500 text-white font-semibold">
                 {user.name.charAt(0).toUpperCase()}
               </AvatarFallback>

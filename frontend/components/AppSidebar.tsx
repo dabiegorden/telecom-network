@@ -23,6 +23,7 @@ import {
   Settings,
   FileText,
   MessageSquare,
+  MessageCircle,
   Calendar,
   Bell,
   Wifi,
@@ -39,6 +40,16 @@ const menuItems = [
         title: "Dashboard",
         url: "/admin-dashboard",
         icon: LayoutDashboard,
+      },
+      {
+        title: "Connections",
+        url: "/admin-dashboard/connections",
+        icon: Users,
+      },
+      {
+        title: "Messages",
+        url: "/admin-dashboard/messages",
+        icon: MessageCircle,
       },
       // {
       //   title: "Analytics",
@@ -182,10 +193,10 @@ export function AppSidebar({ user }: AppSidebarProps) {
         {user && (
           <div className="flex items-center gap-3 px-2 py-3 bg-slate-800/30 rounded-lg">
             <Avatar className="h-10 w-10 border-2 border-cyan-500">
-              {/* <AvatarImage
-                src={user.profileImage || "/placeholder.svg"}
+              <AvatarImage
+                src={user.profileImage || undefined}
                 alt={user.name}
-              /> */}
+                />
               <AvatarFallback className="bg-linear-to-br from-orange-500 to-red-500 text-white font-semibold">
                 {user?.name?.charAt(0)?.toUpperCase()}
               </AvatarFallback>

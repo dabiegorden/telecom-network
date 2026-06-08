@@ -14,6 +14,7 @@ import resourceRoutes from "./routes/resourceRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import connectionRoutes from "./routes/connectionRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js";
+import analyticsRoutes from "./routes/analyticsRoutes.js";
 
 import connectDB from "./config/db.js";
 import { initSocket } from "./socket.js";
@@ -73,6 +74,7 @@ app.use("/resources", resourceRoutes);
 app.use("/notifications", notificationRoutes);
 app.use("/connections", connectionRoutes);
 app.use("/messages", messageRoutes);
+app.use("/analytics", analyticsRoutes);
 
 // =======================
 // 404 Handler

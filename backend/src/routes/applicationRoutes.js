@@ -7,6 +7,7 @@ import {
   getAllApplications,
   updateApplicationStatus,
   withdrawApplication,
+  markApplicationViewed,
 } from "../controllers/applicationController.js";
 import { verifyToken } from "../middleware/authMiddleware.js";
 import { checkRole } from "../middleware/roleMiddleware.js";
@@ -40,8 +41,9 @@ router.delete("/:id/withdraw", verifyToken, withdrawApplication);
 
 //my-applications
 router.get("/my-applications", verifyToken, getMyApplications);
-// Admin routes
-router.get("/admin/all", verifyToken, checkRole("admin"), getAllApplications);
+// Admin / Recruiter routes
+router.get("/admin/all", verifyToken, checkRole("admin", "recruiter"), getAllApplications);
 router.patch("/:id/status", verifyToken, updateApplicationStatus);
+router.patch("/:id/viewed", verifyToken, markApplicationViewed);
 
 export default router;

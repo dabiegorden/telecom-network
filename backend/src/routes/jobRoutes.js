@@ -7,6 +7,10 @@ import {
   getJobById,
   updateJob,
   deleteJob,
+  saveJob,
+  unsaveJob,
+  getSavedJobs,
+  getMyPostedJobs,
   syncExternalJobs,
   previewExternalJobs,
   getJobApplications,
@@ -24,24 +28,31 @@ const storage = multer.diskStorage({
 
 const fileFilter = (_req, file, cb) => {
   const allowed = /jpeg|jpg|png|gif|webp/;
-  const ext = allowed.test(path.extname(file.originalname).toLowerCase());
-  const mime = allowed.test(file.mimetype);
-  if (ext && mime) return cb(null, true);
+  if (allowed.test(path.extname(file.originalname).toLowerCase()) && allowed.test(file.mimetype)) {
+    return cb(null, true);
+  }
   cb(new Error("Only image files are allowed"));
 };
 
-const upload = multer({
-  storage,
-  fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 },
-});
+const upload = multer({ storage, fileFilter, limits: { fileSize: 5 * 1024 * 1024 } });
 
-// Public
+// ── Public ────────────────────────────────────────────────────────────────────
 router.get("/", getAllJobs);
-router.get("/external/preview", previewExternalJobs); // preview RapidAPI results
-router.get("/:id", getJobById);
+router.get("/external/preview", previewExternalJobs);
 
-// Recruiter / Admin only
+// ── Authenticated (any role) ──────────────────────────────────────────────────
+router.get("/saved", verifyToken, getSavedJobs);
+router.get("/:id", getJobById);
+router.post("/:id/save", verifyToken, saveJob);
+router.delete("/:id/save", verifyToken, unsaveJob);
+
+// ── Recruiter / Admin ─────────────────────────────────────────────────────────
+router.get(
+  "/my/posted",
+  verifyToken,
+  checkRole("recruiter", "admin"),
+  getMyPostedJobs,
+);
 router.post(
   "/",
   verifyToken,
@@ -54,7 +65,7 @@ router.post(
   verifyToken,
   checkRole("admin", "recruiter"),
   syncExternalJobs,
-); // sync to DB
+);
 router.put(
   "/:id",
   verifyToken,
@@ -64,7 +75,7 @@ router.put(
 );
 router.delete("/:id", verifyToken, checkRole("recruiter", "admin"), deleteJob);
 
-// Applications for a specific job (admin/recruiter)
+// ── Applications (admin/recruiter + job poster) ───────────────────────────────
 router.get("/:id/applications", verifyToken, getJobApplications);
 
 export default router;

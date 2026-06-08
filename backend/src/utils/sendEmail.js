@@ -15,7 +15,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 export const sendEmail = async ({ to, subject, html }) => {
   try {
     const { data, error } = await resend.emails.send({
-      from: "TelecomNet Ghana <markowusu@newhopewellnesshub.org>",
+      from: "TelecomNet Ghana <info@kofibadu.com>",
       to: [to],
       subject,
       html,

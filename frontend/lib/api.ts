@@ -97,10 +97,11 @@ export const usersApi = {
 // ─── Jobs API ─────────────────────────────────────────────────────────────────
 
 export const jobsApi = {
-  // Get all jobs — optional filters: location, source, search, page, limit
   getAllJobs: async (params?: {
     location?: string;
     source?: "internal" | "rapidapi";
+    jobType?: string;
+    experienceLevel?: string;
     search?: string;
     page?: number;
     limit?: number;
@@ -112,13 +113,11 @@ export const jobsApi = {
     return response.json();
   },
 
-  // Get single job by ID
   getJobById: async (id: string) => {
     const response = await fetch(`${API}/jobs/${id}`);
     return response.json();
   },
 
-  // Create job (FormData for image upload, or plain object)
   createJob: async (data: FormData | Record<string, any>) => {
     const isFormData = data instanceof FormData;
     const response = await fetch(`${API}/jobs`, {
@@ -131,7 +130,6 @@ export const jobsApi = {
     return response.json();
   },
 
-  // Update job
   updateJob: async (id: string, data: FormData | Record<string, any>) => {
     const isFormData = data instanceof FormData;
     const response = await fetch(`${API}/jobs/${id}`, {
@@ -144,7 +142,6 @@ export const jobsApi = {
     return response.json();
   },
 
-  // Delete job (also removes all related applications on the backend)
   deleteJob: async (id: string) => {
     const response = await fetch(`${API}/jobs/${id}`, {
       method: "DELETE",
@@ -153,7 +150,42 @@ export const jobsApi = {
     return response.json();
   },
 
-  // Get all applications for a specific job (admin / recruiter only)
+  saveJob: async (id: string) => {
+    const response = await fetch(`${API}/jobs/${id}/save`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  unsaveJob: async (id: string) => {
+    const response = await fetch(`${API}/jobs/${id}/save`, {
+      method: "DELETE",
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  getSavedJobs: async (params?: { page?: number; limit?: number }) => {
+    const qs = params
+      ? `?${new URLSearchParams(params as Record<string, string>).toString()}`
+      : "";
+    const response = await fetch(`${API}/jobs/saved${qs}`, {
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  getMyPostedJobs: async (params?: { page?: number; limit?: number; status?: string }) => {
+    const qs = params
+      ? `?${new URLSearchParams(params as Record<string, string>).toString()}`
+      : "";
+    const response = await fetch(`${API}/jobs/my/posted${qs}`, {
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
   getJobApplications: async (
     jobId: string,
     params?: { page?: number; limit?: number; status?: string },
@@ -167,7 +199,6 @@ export const jobsApi = {
     return response.json();
   },
 
-  // Sync external jobs from RapidAPI Indeed into the database (admin only)
   syncExternalJobs: async (params?: {
     query?: string;
     location?: string;
@@ -185,7 +216,6 @@ export const jobsApi = {
     return response.json();
   },
 
-  // Preview external jobs from RapidAPI without saving to DB
   previewExternalJobs: async (params?: {
     query?: string;
     location?: string;
@@ -264,7 +294,6 @@ export const applicationsApi = {
     return response.json();
   },
 
-  // Admin / recruiter: move an application through the hiring pipeline
   updateApplicationStatus: async (
     applicationId: string,
     status: "pending" | "reviewing" | "shortlisted" | "rejected" | "hired",
@@ -274,15 +303,17 @@ export const applicationsApi = {
       `${API}/applications/${applicationId}/status`,
       {
         method: "PATCH",
-        headers: {
-          ...getAuthHeaders(),
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          status,
-          ...(notes !== undefined && { notes }),
-        }),
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ status, ...(notes !== undefined && { notes }) }),
       },
+    );
+    return response.json();
+  },
+
+  markApplicationViewed: async (applicationId: string) => {
+    const response = await fetch(
+      `${API}/applications/${applicationId}/viewed`,
+      { method: "PATCH", headers: getAuthHeaders() },
     );
     return response.json();
   },
@@ -444,6 +475,31 @@ export const messagesApi = {
   markConversationAsRead: async (conversationId: string) => {
     const response = await fetch(`${API}/messages/conversations/${conversationId}/read`, {
       method: "PUT",
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+};
+
+// ─── Analytics API ────────────────────────────────────────────────────────────
+
+export const analyticsApi = {
+  getPlatformAnalytics: async () => {
+    const response = await fetch(`${API}/analytics/platform`, {
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  getRecruiterAnalytics: async () => {
+    const response = await fetch(`${API}/analytics/recruiter`, {
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  getProfessionalAnalytics: async () => {
+    const response = await fetch(`${API}/analytics/professional`, {
       headers: getAuthHeaders(),
     });
     return response.json();

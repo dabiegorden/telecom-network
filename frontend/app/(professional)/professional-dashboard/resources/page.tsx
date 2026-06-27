@@ -81,7 +81,7 @@ const ProfessionalResourcesPage = () => {
       const data = await response.json();
 
       if (data.success) {
-        setResources(data.data);
+        setResources(data.data || []);
         setTotalPages(data.pages);
       } else {
         toast.error(data.message || "Failed to fetch resources");
@@ -141,6 +141,7 @@ const ProfessionalResourcesPage = () => {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "N/A";
     return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",

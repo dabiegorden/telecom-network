@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, MessageSquare, Send, Circle, Users } from "lucide-react";
 import { messagesApi, connectionsApi } from "@/lib/api";
 import { getSocket } from "@/lib/socket";
-import { formatDistanceToNow } from "date-fns";
+import { safeFormatDistanceToNow } from "@/lib/utils";
 
 interface PublicUser {
   _id: string;
@@ -473,7 +473,7 @@ export default function MessagesPage() {
                               isMine ? "text-cyan-100/70" : "text-slate-400"
                             }`}
                           >
-                            {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
+                            {safeFormatDistanceToNow(message.createdAt)}
                           </p>
                         </div>
                       </div>

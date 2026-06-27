@@ -163,11 +163,11 @@ const ProfessionalDashboard = () => {
 
       if (analyticsRes.success) setAnalytics(analyticsRes.data);
 
-      if (postsRes.success) setRecentPosts(postsRes.data.slice(0, 5));
+      if (postsRes.success) setRecentPosts((postsRes.data || []).slice(0, 5));
       if (resourcesRes.success)
-        setRecentResources(resourcesRes.data.slice(0, 5));
+        setRecentResources((resourcesRes.data || []).slice(0, 5));
       if (applicationsRes.success)
-        setRecentApplications(applicationsRes.data.slice(0, 5));
+        setRecentApplications((applicationsRes.data || []).slice(0, 5));
     } catch (error) {
       toast.error("Failed to fetch dashboard data");
     } finally {

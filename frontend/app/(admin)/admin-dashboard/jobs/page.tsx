@@ -1,5 +1,7 @@
 "use client";
 
+import { safeFormatDate } from "@/lib/utils";
+
 import { useEffect, useState, useCallback } from "react";
 import { jobsApi } from "@/lib/api";
 import { toast } from "sonner";
@@ -289,7 +291,7 @@ export default function AdminJobsPage() {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const data = await res.json();
-      if (data.success) setApplications(data.data);
+      if (data.success) setApplications(data.data || []);
       else toast.error(data.message || "Failed to load applications");
     } catch {
       toast.error("Failed to load applications");
@@ -769,7 +771,7 @@ export default function AdminJobsPage() {
                         </button>
                       </TableCell>
                       <TableCell className="text-slate-300">
-                        {new Date(job.createdAt).toLocaleDateString()}
+                        {safeFormatDate(job.createdAt)}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1">
@@ -900,7 +902,7 @@ export default function AdminJobsPage() {
                 <div className="flex items-center gap-2 text-slate-300">
                   <Calendar className="h-4 w-4 text-slate-500" />
                   <span>
-                    {new Date(selectedJob.createdAt).toLocaleDateString()}
+                    {safeFormatDate(selectedJob.createdAt)}
                   </span>
                 </div>
               </div>
@@ -1038,7 +1040,7 @@ export default function AdminJobsPage() {
                           {app.applicant.email}
                         </p>
                         <p className="text-slate-500 text-xs mt-0.5">
-                          Applied {new Date(app.createdAt).toLocaleDateString()}
+                          Applied {safeFormatDate(app.createdAt)}
                         </p>
                       </div>
                     </div>

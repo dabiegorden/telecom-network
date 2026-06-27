@@ -143,7 +143,9 @@ const fmt = (bytes?: number | null) => {
 };
 
 const timeAgo = (date: string) => {
-  const diff = Date.now() - new Date(date).getTime();
+  const parsed = new Date(date).getTime();
+  if (isNaN(parsed)) return "recently";
+  const diff = Date.now() - parsed;
   const m = Math.floor(diff / 60000);
   if (m < 1) return "just now";
   if (m < 60) return `${m}m ago`;
@@ -375,7 +377,7 @@ export default function AdminPostsPage() {
         headers: authHeaders(),
       });
       const data = await res.json();
-      if (data.success) setPosts(data.data);
+      if (data.success) setPosts(data.data || []);
       else toast.error(data.message || "Failed to load posts");
     } catch (e) {
       toast.error("Failed to load posts");

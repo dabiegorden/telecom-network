@@ -1,5 +1,7 @@
 "use client";
 
+import { safeFormatDate } from "@/lib/utils";
+
 import { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
 import {
@@ -157,7 +159,7 @@ export default function AdminResourcesPage() {
       const res = await fetch(`${API}/resources?${params.toString()}`);
       const data = await res.json();
 
-      if (data.success) setResources(data.data);
+      if (data.success) setResources(data.data || []);
       else toast.error(data.message || "Failed to fetch resources");
     } catch {
       toast.error("Failed to fetch resources");
@@ -642,7 +644,7 @@ export default function AdminResourcesPage() {
                         </TableCell>
 
                         <TableCell className="text-slate-300">
-                          {new Date(resource.createdAt).toLocaleDateString()}
+                          {safeFormatDate(resource.createdAt)}
                         </TableCell>
 
                         {/* Actions */}
@@ -767,7 +769,7 @@ export default function AdminResourcesPage() {
                 <div className="flex items-center gap-2 text-slate-400">
                   <Calendar className="h-4 w-4 text-slate-500" />
                   <span>
-                    {new Date(selected.createdAt).toLocaleDateString()}
+                    {safeFormatDate(selected.createdAt)}
                   </span>
                 </div>
               </div>

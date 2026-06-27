@@ -1,5 +1,7 @@
 "use client";
 
+import { safeFormatDate } from "@/lib/utils";
+
 import { useEffect, useState } from "react";
 import { usersApi } from "@/lib/api";
 import { toast } from "sonner";
@@ -200,7 +202,7 @@ export default function AdminRecruitersPage() {
                       {recruiter.location || "N/A"}
                     </TableCell>
                     <TableCell className="text-slate-300">
-                      {new Date(recruiter.createdAt).toLocaleDateString()}
+                      {safeFormatDate(recruiter.createdAt)}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">

@@ -70,7 +70,7 @@ export default function AdminProfessionalsPage() {
       setLoading(true);
       const response = await usersApi.getAllProfessionals();
       if (response.success) {
-        setProfessionals(response.data);
+        setProfessionals(response.data || []);
       } else {
         toast.error(response.message || "Failed to fetch professionals");
       }

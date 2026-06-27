@@ -104,7 +104,7 @@ const MyApplicationsList = () => {
       const data = await response.json();
 
       if (data.success) {
-        setApplications(data.data);
+        setApplications(data.data || []);
         setTotalPages(data.pages);
       } else {
         toast.error(data.message || "Failed to fetch applications");
@@ -179,6 +179,7 @@ const MyApplicationsList = () => {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "N/A";
     return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",

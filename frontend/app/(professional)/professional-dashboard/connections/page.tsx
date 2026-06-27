@@ -26,7 +26,7 @@ import {
   Search,
 } from "lucide-react";
 import { connectionsApi } from "@/lib/api";
-import { formatDistanceToNow } from "date-fns";
+import { safeFormatDistanceToNow } from "@/lib/utils";
 
 interface PublicUser {
   _id: string;
@@ -341,7 +341,7 @@ export default function ConnectionsPage() {
               : connections.map((conn) =>
                   renderUserCard(
                     conn.user,
-                    `Connected ${formatDistanceToNow(new Date(conn.connectedAt), { addSuffix: true })}`,
+                    `Connected ${safeFormatDistanceToNow(conn.connectedAt)}`,
                     <Button
                       onClick={() =>
                         handleRemove(conn._id, "Connection removed")
@@ -368,7 +368,7 @@ export default function ConnectionsPage() {
                   req.requester
                     ? renderUserCard(
                         req.requester,
-                        `Requested ${formatDistanceToNow(new Date(req.createdAt), { addSuffix: true })}`,
+                        `Requested ${safeFormatDistanceToNow(req.createdAt)}`,
                         <>
                           <Button
                             onClick={() => handleRespond(req._id, "accepted")}
@@ -404,7 +404,7 @@ export default function ConnectionsPage() {
                   req.recipient
                     ? renderUserCard(
                         req.recipient,
-                        `Sent ${formatDistanceToNow(new Date(req.createdAt), { addSuffix: true })}`,
+                        `Sent ${safeFormatDistanceToNow(req.createdAt)}`,
                         <Button
                           onClick={() =>
                             handleRemove(req._id, "Request withdrawn")

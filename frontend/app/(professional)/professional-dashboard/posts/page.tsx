@@ -57,7 +57,7 @@ import {
   Paperclip,
   X,
 } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { safeFormatDistanceToNow } from "@/lib/utils";
 
 interface User {
   _id: string;
@@ -172,7 +172,7 @@ const ProfessionalPostsPage = () => {
       const data = await response.json();
 
       if (data.success) {
-        setPosts(data.data);
+        setPosts(data.data || []);
         setTotalPages(data.pages);
       }
     } catch (error) {
@@ -243,7 +243,7 @@ const ProfessionalPostsPage = () => {
       const data = await response.json();
 
       if (data.success) {
-        setComments(data.data);
+        setComments(data.data || []);
       }
     } catch (error) {
       toast.error("Failed to fetch comments");
@@ -531,9 +531,7 @@ const ProfessionalPostsPage = () => {
                         )}
                       </div>
                       <p className="text-sm text-slate-400">
-                        {formatDistanceToNow(new Date(post.createdAt), {
-                          addSuffix: true,
-                        })}
+                        {safeFormatDistanceToNow(post.createdAt)}
                       </p>
                     </div>
                   </div>
@@ -714,9 +712,7 @@ const ProfessionalPostsPage = () => {
                             {comment?.user?.name}
                           </span>
                           <span className="text-xs text-slate-400">
-                            {formatDistanceToNow(new Date(comment?.createdAt), {
-                              addSuffix: true,
-                            })}
+                            {safeFormatDistanceToNow(comment?.createdAt)}
                           </span>
                         </div>
                         <p className="text-slate-300 text-sm whitespace-pre-wrap">
@@ -847,10 +843,7 @@ const ProfessionalPostsPage = () => {
                                     {reply.user.name}
                                   </span>
                                   <span className="text-xs text-slate-400">
-                                    {formatDistanceToNow(
-                                      new Date(reply.createdAt),
-                                      { addSuffix: true },
-                                    )}
+                                    {safeFormatDistanceToNow(reply.createdAt)}
                                   </span>
                                 </div>
                                 <p className="text-slate-300 text-xs">

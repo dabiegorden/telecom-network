@@ -71,7 +71,7 @@ const ExternalJobsList = ({
       const data = await response.json();
 
       if (data.success) {
-        setJobs(data.data);
+        setJobs(data.data || []);
       } else {
         toast.error(data.message || "Failed to fetch external jobs");
       }
@@ -117,6 +117,7 @@ const ExternalJobsList = ({
     if (!timestamp) return "Recently posted";
 
     const date = new Date(timestamp);
+    if (isNaN(date.getTime())) return "Recently posted";
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - date.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));

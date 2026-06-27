@@ -88,7 +88,7 @@ const InternalJobsList = ({
       const data = await response.json();
 
       if (data.success) {
-        setJobs(data.data);
+        setJobs(data.data || []);
         setTotalPages(data.pages);
       } else {
         toast.error(data.message || "Failed to fetch jobs");
@@ -129,6 +129,7 @@ const InternalJobsList = ({
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "Recently";
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - date.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));

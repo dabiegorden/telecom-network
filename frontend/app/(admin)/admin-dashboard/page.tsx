@@ -254,7 +254,7 @@ export default function AdminDashboardPage() {
                     label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
                     labelLine={false}
                   >
-                    {data.applicationsByStatus.map((entry, index) => (
+                    {(data.applicationsByStatus || []).map((entry, index) => (
                       <Cell
                         key={entry.status}
                         fill={STATUS_COLORS[entry.status] || PIE_COLORS[index % PIE_COLORS.length]}
@@ -289,7 +289,7 @@ export default function AdminDashboardPage() {
                   <YAxis tick={{ fill: "#94a3b8", fontSize: 12 }} axisLine={false} tickLine={false} />
                   <Tooltip content={<DarkTooltip />} />
                   <Bar dataKey="count" name="Posts" radius={[4, 4, 0, 0]}>
-                    {data.postsByCategory.map((entry, index) => (
+                    {(data.postsByCategory || []).map((entry, index) => (
                       <Cell key={entry.category} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                     ))}
                   </Bar>
@@ -358,7 +358,7 @@ export default function AdminDashboardPage() {
             <ResponsiveContainer width={200} height={200}>
               <PieChart>
                 <Pie data={data.roleDist} dataKey="count" nameKey="role" cx="50%" cy="50%" outerRadius={80} innerRadius={40} paddingAngle={4}>
-                  {data.roleDist.map((entry, index) => (
+                  {(data.roleDist || []).map((entry, index) => (
                     <Cell key={entry.role} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                   ))}
                 </Pie>
@@ -366,7 +366,7 @@ export default function AdminDashboardPage() {
               </PieChart>
             </ResponsiveContainer>
             <div className="flex flex-col gap-3 flex-1">
-              {data.roleDist.map((item, index) => (
+              {(data.roleDist || []).map((item, index) => (
                 <div key={item.role} className="flex items-center justify-between bg-slate-800/50 rounded-lg p-3 border border-slate-700">
                   <div className="flex items-center gap-3">
                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: PIE_COLORS[index % PIE_COLORS.length] }} />

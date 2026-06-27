@@ -197,7 +197,7 @@ export default function RecruiterDashboardPage() {
                 <ResponsiveContainer width={180} height={180}>
                   <PieChart>
                     <Pie data={data.pipeline} dataKey="count" nameKey="status" cx="50%" cy="50%" outerRadius={80} innerRadius={40} paddingAngle={3}>
-                      {data.pipeline.map((entry, i) => (
+                      {(data.pipeline || []).map((entry, i) => (
                         <Cell key={entry.status} fill={STATUS_COLORS[entry.status] || PIE_COLORS[i % PIE_COLORS.length]} />
                       ))}
                     </Pie>
@@ -205,7 +205,7 @@ export default function RecruiterDashboardPage() {
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="flex flex-col gap-2 flex-1">
-                  {data.pipeline.map((item, i) => (
+                  {(data.pipeline || []).map((item, i) => (
                     <div key={item.status} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: STATUS_COLORS[item.status] || PIE_COLORS[i % PIE_COLORS.length] }} />
@@ -262,7 +262,7 @@ export default function RecruiterDashboardPage() {
                   <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} />
                   <Tooltip content={<DarkTooltip />} />
                   <Bar dataKey="count" name="Jobs" radius={[4, 4, 0, 0]}>
-                    {data.jobsByStatus.map((entry, i) => (
+                    {(data.jobsByStatus || []).map((entry, i) => (
                       <Cell key={entry.status} fill={STATUS_COLORS[entry.status] || PIE_COLORS[i % PIE_COLORS.length]} />
                     ))}
                   </Bar>

@@ -1,5 +1,7 @@
 "use client";
 
+import { safeFormatDate } from "@/lib/utils";
+
 import { useEffect, useState } from "react";
 import { usersApi } from "@/lib/api";
 import { toast } from "sonner";
@@ -111,7 +113,7 @@ export default function AdminUsersPage() {
       setLoading(true);
       const response = await usersApi.getAllUsers();
       if (response.success) {
-        setUsers(response.data);
+        setUsers(response.data || []);
       } else {
         toast.error(response.message || "Failed to fetch users");
       }
@@ -651,14 +653,7 @@ export default function AdminUsersPage() {
                   { label: "Location", value: selectedUser.location },
                   {
                     label: "Member Since",
-                    value: new Date(selectedUser.createdAt).toLocaleDateString(
-                      "en-US",
-                      {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      },
-                    ),
+                    value: safeFormatDate(selectedUser.createdAt),
                   },
                 ].map(({ label, value }) => (
                   <div

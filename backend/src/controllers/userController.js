@@ -98,7 +98,7 @@ export const updateCurrentUser = async (req, res) => {
     const profileImageFile = req.files?.profileImage?.[0] || req.file;
     if (profileImageFile) {
       const result = await uploadToCloudinary(
-        profileImageFile.path,
+        profileImageFile.buffer,
         "telecom-network/profiles",
       );
       user.profileImage = result.url;
@@ -108,7 +108,7 @@ export const updateCurrentUser = async (req, res) => {
     const bannerImageFile = req.files?.bannerImage?.[0];
     if (bannerImageFile) {
       const result = await uploadToCloudinary(
-        bannerImageFile.path,
+        bannerImageFile.buffer,
         "telecom-network/banners",
       );
       user.bannerImage = result.url;

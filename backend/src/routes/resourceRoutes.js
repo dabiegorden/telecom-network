@@ -1,6 +1,5 @@
 import express from "express";
 import multer from "multer";
-import path from "path";
 import {
   createResource,
   getAllResources,
@@ -15,11 +14,9 @@ const router = express.Router();
 
 // ─── Multer config ────────────────────────────────────────────────────────────
 
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, "tmp/uploads/"),
-  filename: (_req, file, cb) =>
-    cb(null, `resource-${Date.now()}${path.extname(file.originalname)}`),
-});
+// Use in-memory storage so uploads work on read-only serverless filesystems
+// (e.g. Vercel). Buffers are streamed straight to Cloudinary.
+const storage = multer.memoryStorage();
 
 /**
  * Allowed MIME types:

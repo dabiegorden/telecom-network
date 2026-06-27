@@ -1,6 +1,5 @@
 import express from "express";
 import multer from "multer";
-import path from "path";
 import {
   createPost,
   getAllPosts,
@@ -23,11 +22,8 @@ const router = express.Router();
 
 // ─── Multer config ────────────────────────────────────────────────────────────
 
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, "tmp/uploads/"),
-  filename: (_req, file, cb) =>
-    cb(null, `post-${Date.now()}${path.extname(file.originalname)}`),
-});
+// In-memory storage → buffers streamed to Cloudinary (serverless-safe).
+const storage = multer.memoryStorage();
 
 const ALLOWED_MIMES = new Set([
   "image/jpeg",

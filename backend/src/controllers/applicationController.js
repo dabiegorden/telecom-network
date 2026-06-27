@@ -10,15 +10,8 @@ import {
   findOrCreateConversation,
   createAndDeliverMessage,
 } from "./messageController.js";
-import fs from "fs";
-
-const cleanupFile = (filePath) => {
-  if (filePath && fs.existsSync(filePath)) {
-    try {
-      fs.unlinkSync(filePath);
-    } catch (_) {}
-  }
-};
+// In-memory storage leaves no temp file to clean up. No-op kept for call sites.
+const cleanupFile = () => {};
 
 // Friendly, candidate-facing copy for each stage of the pipeline.
 const STATUS_MESSAGES = {
@@ -198,7 +191,7 @@ export const applyToJob = async (req, res) => {
     if (req.file) {
       try {
         const result = await uploadToCloudinary(
-          req.file.path,
+          req.file.buffer,
           "telecom-network/resumes",
           {
             resource_type: "raw",
@@ -208,10 +201,7 @@ export const applyToJob = async (req, res) => {
         appData.resumeUrl = result.url;
         appData.resumePublicId = result.publicId;
         appData.resumeFileName = req.file.originalname;
-
-        cleanupFile(req.file.path);
       } catch (err) {
-        cleanupFile(req.file.path);
         console.error("Resume upload error:", err);
       }
     }

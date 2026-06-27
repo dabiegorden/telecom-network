@@ -15,11 +15,8 @@ import { checkRole } from "../middleware/roleMiddleware.js";
 const router = express.Router();
 
 // Resume upload (PDF, DOC, DOCX up to 5MB)
-const resumeStorage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, "tmp/uploads/"),
-  filename: (_req, file, cb) =>
-    cb(null, `resume-${Date.now()}${path.extname(file.originalname)}`),
-});
+// In-memory storage → buffers streamed to Cloudinary (serverless-safe).
+const resumeStorage = multer.memoryStorage();
 
 const resumeFilter = (_req, file, cb) => {
   const allowed = /pdf|doc|docx/;

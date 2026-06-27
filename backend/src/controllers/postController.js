@@ -4,17 +4,10 @@ import {
   uploadToCloudinary,
   deleteFromCloudinary,
 } from "../utils/cloudinary.js";
-import fs from "fs";
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const cleanupFile = (path) => {
-  if (path && fs.existsSync(path)) {
-    try {
-      fs.unlinkSync(path);
-    } catch (_) {}
-  }
-};
+// In-memory storage leaves no temp file to clean up. No-op kept for call sites.
+const cleanupFile = () => {};
 
 const ALLOWED_MIMES = new Set([
   "image/jpeg",
@@ -42,10 +35,9 @@ const detectFileType = (mime = "") => {
 
 const uploadAttachment = async (file) => {
   const isImage = file.mimetype.startsWith("image/");
-  const result = await uploadToCloudinary(file.path, "telecom-network/posts", {
+  const result = await uploadToCloudinary(file.buffer, "telecom-network/posts", {
     resource_type: isImage ? "image" : "raw",
   });
-  cleanupFile(file.path);
   return {
     attachmentUrl: result.url,
     attachmentPublicId: result.publicId || result.public_id || null,

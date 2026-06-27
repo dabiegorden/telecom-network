@@ -3,17 +3,12 @@ import {
   uploadToCloudinary,
   deleteFromCloudinary,
 } from "../utils/cloudinary.js";
-import fs from "fs";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const cleanupFile = (filePath) => {
-  if (filePath && fs.existsSync(filePath)) {
-    try {
-      fs.unlinkSync(filePath);
-    } catch (_) {}
-  }
-};
+// With in-memory storage there is no temp file to remove. Kept as a no-op so
+// existing call sites stay valid.
+const cleanupFile = () => {};
 
 /**
  * Detect a friendly fileType category from the raw MIME type.
@@ -44,11 +39,10 @@ const detectFileType = (mimeType = "") => {
 const uploadResourceFile = async (file) => {
   const isImage = file.mimetype.startsWith("image/");
   const result = await uploadToCloudinary(
-    file.path,
+    file.buffer,
     "telecom-network/resources",
     { resource_type: isImage ? "image" : "raw" },
   );
-  cleanupFile(file.path);
   return result;
 };
 

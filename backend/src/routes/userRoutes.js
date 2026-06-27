@@ -15,18 +15,9 @@ import { checkRole } from "../middleware/roleMiddleware.js";
 const router = express.Router();
 
 import multer from "multer";
-import path from "path";
 
-// Configure multer for Vercel temporary storage
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, "/tmp/uploads");
-  },
-
-  filename: (_req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  },
-});
+// In-memory storage → buffers streamed to Cloudinary (serverless-safe).
+const storage = multer.memoryStorage();
 
 const upload = multer({ storage });
 

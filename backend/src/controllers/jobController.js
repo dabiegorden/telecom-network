@@ -6,8 +6,6 @@ import {
   uploadToCloudinary,
   deleteFromCloudinary,
 } from "../utils/cloudinary.js";
-import fs from "fs";
-
 const RAPIDAPI_KEY =
   process.env.RAPIDAPI_KEY ||
   "26c573e268mshc969a50d4a14acfp1ad9e3jsn4f032149e9e3";
@@ -15,19 +13,14 @@ const RAPIDAPI_HOST = "jobs-api14.p.rapidapi.com";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-const cleanupFile = (filePath) => {
-  if (filePath && fs.existsSync(filePath)) {
-    try { fs.unlinkSync(filePath); } catch (_) {}
-  }
-};
+// In-memory storage leaves no temp file to clean up. No-op kept for call sites.
+const cleanupFile = () => {};
 
 const handleImageUpload = async (file, folder) => {
   try {
-    const result = await uploadToCloudinary(file.path, folder);
-    cleanupFile(file.path);
+    const result = await uploadToCloudinary(file.buffer, folder);
     return { imageUrl: result.url, imagePublicId: result.publicId };
   } catch (err) {
-    cleanupFile(file.path);
     console.error("Image upload error:", err);
     return null;
   }

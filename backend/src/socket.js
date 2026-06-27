@@ -14,7 +14,7 @@ export const getOnlineUsers = () => onlineUsers;
 export const initSocket = (httpServer) => {
   io = new Server(httpServer, {
     cors: {
-      origin: ["http://localhost:3000", process.env.FRONTEND_URL].filter(Boolean),
+      origin: ["http://localhost:3000", process.env.FRONTEND_URL],
       credentials: true,
     },
   });

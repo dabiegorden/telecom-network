@@ -33,14 +33,9 @@ fs.mkdirSync(uploadDir, { recursive: true });
 
 app.use(helmet());
 
-const allowedOrigins = [
-  "http://localhost:3000",
-  process.env.FRONTEND_URL,
-].filter(Boolean);
-
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: ["http://localhost:3000", process.env.FRONTEND_URL],
     credentials: true,
   }),
 );

@@ -15,9 +15,6 @@
   "author": "Dabie Gorden",
   "license": "ISC",
   "type": "module",
-  "engines": {
-    "node": ">=20.0.0"
-  },
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.9.0",

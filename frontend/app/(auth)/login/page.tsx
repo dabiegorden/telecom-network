@@ -78,30 +78,15 @@ const LoginPage = () => {
         throw new Error(data.message || "Login failed");
       }
 
-      toast.success("Login successful! Redirecting...");
+      // Two-step login: credentials verified, now confirm the emailed OTP
+      toast.success("A verification code has been sent to your email.");
 
-      // Store token and user data
-      localStorage.setItem("token", data.data.token);
-      localStorage.setItem("user", JSON.stringify(data.data.user));
+      sessionStorage.setItem("pendingVerificationEmail", formData.email);
 
       setSuccess(true);
 
-      // Role-based redirect after 1 second
       setTimeout(() => {
-        const userRole = data.data.user.role;
-
-        switch (userRole) {
-          case "admin":
-            router.push("/admin-dashboard");
-            break;
-          case "recruiter":
-            router.push("/recruiter-dashboard");
-            break;
-          case "professional":
-          default:
-            router.push("/professional-dashboard");
-            break;
-        }
+        router.push("/verify-otp");
       }, 1000);
     } catch (err: any) {
       setError(err.message || "Invalid credentials. Please try again.");
@@ -180,10 +165,10 @@ const LoginPage = () => {
                 <CheckCircle2 className="w-10 h-10 text-green-400" />
               </motion.div>
               <h3 className="text-2xl font-bold text-white mb-2">
-                Login Successful!
+                Credentials Verified!
               </h3>
               <p className="text-slate-400 mb-4">
-                Redirecting to your dashboard...
+                We sent a verification code to your email. Redirecting...
               </p>
               <div className="inline-flex items-center gap-2 text-cyan-400">
                 <Loader2 className="w-5 h-5 animate-spin" />

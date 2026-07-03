@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/button";
 import {
   Users, Briefcase, FileText, TrendingUp, CheckCircle,
   XCircle, HourglassIcon, ArrowRight, Loader2, Activity,
-  ClipboardList, UserCheck,
+  ClipboardList, UserCheck, MessageSquare, Heart, Eye, Clock,
 } from "lucide-react";
+import { safeFormatDistanceToNow } from "@/lib/utils";
 import Link from "next/link";
 import {
   BarChart, Bar, PieChart, Pie, Cell, LineChart, Line,
@@ -31,6 +32,18 @@ interface RecruiterData {
   applicationGrowth: { month: string; count: number }[];
   jobsByStatus: { status: string; count: number }[];
 }
+
+interface ForumPost {
+  _id: string;
+  title: string;
+  category: string;
+  likeCount: number;
+  commentCount: number;
+  viewCount: number;
+  createdAt: string;
+}
+
+const API = process.env.NEXT_PUBLIC_API_URL || "/api";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -63,6 +76,8 @@ export default function RecruiterDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<any>(null);
 
+  const [forumPosts, setForumPosts] = useState<ForumPost[]>([]);
+
   useEffect(() => {
     const userData = localStorage.getItem("user");
     if (userData) setCurrentUser(JSON.parse(userData));
@@ -70,6 +85,16 @@ export default function RecruiterDashboardPage() {
       if (res.success) setData(res.data);
       setLoading(false);
     });
+
+    const token = localStorage.getItem("token");
+    fetch(`${API}/posts?limit=5&sort=newest`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then((res) => {
+        if (res.success) setForumPosts((res.data || []).slice(0, 5));
+      })
+      .catch(() => {});
   }, []);
 
   if (loading) {
@@ -272,6 +297,55 @@ export default function RecruiterDashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Community Forum */}
+      <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-sm">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-white flex items-center gap-2">
+                <MessageSquare className="h-5 w-5 text-blue-400" />
+                Community Forum
+              </CardTitle>
+              <CardDescription className="text-slate-400">
+                Latest discussions from the community
+              </CardDescription>
+            </div>
+            <Link href="/recruiter-dashboard/posts">
+              <Button variant="ghost" size="sm" className="text-cyan-400 hover:text-cyan-300 hover:bg-slate-700">
+                View forum <ArrowRight className="h-4 w-4 ml-1" />
+              </Button>
+            </Link>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {forumPosts.length === 0 ? (
+            <div className="text-center py-8 text-slate-400">
+              <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-50" />
+              <p>No forum posts yet</p>
+            </div>
+          ) : (
+            forumPosts.map((post) => (
+              <Link
+                key={post._id}
+                href="/recruiter-dashboard/posts"
+                className="block bg-slate-900/50 border border-slate-800 rounded-lg p-4 hover:border-slate-600 transition-colors"
+              >
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <h3 className="font-semibold text-white flex-1 line-clamp-2">{post.title}</h3>
+                  <Badge className="bg-cyan-500/10 text-cyan-400 border-cyan-500/20">{post.category}</Badge>
+                </div>
+                <div className="flex items-center gap-4 text-xs text-slate-400">
+                  <div className="flex items-center gap-1"><Heart className="h-3 w-3" />{post.likeCount}</div>
+                  <div className="flex items-center gap-1"><MessageSquare className="h-3 w-3" />{post.commentCount}</div>
+                  <div className="flex items-center gap-1"><Eye className="h-3 w-3" />{post.viewCount}</div>
+                  <div className="flex items-center gap-1 ml-auto"><Clock className="h-3 w-3" />{safeFormatDistanceToNow(post.createdAt)}</div>
+                </div>
+              </Link>
+            ))
+          )}
+        </CardContent>
+      </Card>
 
       {/* Quick Actions */}
       <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-sm">

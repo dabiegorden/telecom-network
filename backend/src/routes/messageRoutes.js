@@ -7,8 +7,15 @@ import {
   markConversationAsRead,
 } from "../controllers/messageController.js";
 import { verifyToken } from "../middleware/authMiddleware.js";
+import multer from "multer";
 
 const router = express.Router();
+
+// In-memory storage → buffers streamed to Cloudinary (serverless-safe).
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
+});
 
 // @route   GET /messages/conversations
 // @desc    Get all conversations for the current user
@@ -28,7 +35,12 @@ router.get("/conversations/:conversationId", verifyToken, getMessages);
 // @route   POST /messages/conversations/:conversationId
 // @desc    Send a message in a conversation
 // @access  Private
-router.post("/conversations/:conversationId", verifyToken, sendMessage);
+router.post(
+  "/conversations/:conversationId",
+  verifyToken,
+  upload.single("attachment"),
+  sendMessage,
+);
 
 // @route   PUT /messages/conversations/:conversationId/read
 // @desc    Mark a conversation as read

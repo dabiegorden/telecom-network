@@ -29,6 +29,7 @@ import {
 import { toast } from "sonner";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
+import { downloadFile } from "@/lib/utils";
 
 interface Resource {
   _id: string;
@@ -96,7 +97,7 @@ const ProfessionalResourcesPage = () => {
 
   const handleDownload = async (resource: Resource) => {
     try {
-      window.open(resource.fileUrl, "_blank");
+      await downloadFile(resource.fileUrl, resource.fileName);
       toast.success("Download started");
     } catch (error) {
       toast.error("Error downloading file");

@@ -1,6 +1,6 @@
 "use client";
 
-import { safeFormatDate } from "@/lib/utils";
+import { safeFormatDate, downloadFile } from "@/lib/utils";
 
 import { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
@@ -664,17 +664,10 @@ export default function AdminResourcesPage() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              asChild
+                              onClick={() => downloadFile(resource.fileUrl, resource.fileName || resource.title)}
                               className="text-violet-400 hover:text-violet-300 hover:bg-violet-500/10"
                             >
-                              <a
-                                href={resource.fileUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                download
-                              >
-                                <Download className="h-4 w-4" />
-                              </a>
+                              <Download className="h-4 w-4" />
                             </Button>
                             <Button
                               variant="ghost"
@@ -776,18 +769,11 @@ export default function AdminResourcesPage() {
 
               <div className="flex gap-2 pt-1">
                 <Button
-                  asChild
+                  onClick={() => downloadFile(selected.fileUrl, selected.fileName || selected.title)}
                   className="flex-1 bg-linear-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600 text-white"
                 >
-                  <a
-                    href={selected.fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    download
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    Download
-                  </a>
+                  <Download className="h-4 w-4 mr-2" />
+                  Download
                 </Button>
                 <Button
                   asChild

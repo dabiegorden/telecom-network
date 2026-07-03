@@ -114,17 +114,18 @@ const RegisterPage = () => {
         throw new Error(data.message || "Registration failed");
       }
 
-      toast.success("Registration successful! Redirecting to login...");
+      toast.success(
+        "Registration successful! Check your email for a verification code.",
+      );
 
-      // Store token and user data
-      localStorage.setItem("token", data.data.token);
-      localStorage.setItem("user", JSON.stringify(data.data.user));
+      // OTP verification is required before login
+      sessionStorage.setItem("pendingVerificationEmail", formData.email);
 
       setSuccess(true);
 
-      // Redirect to professional dashboard after 1.5 seconds
+      // Redirect to the OTP verification page after 1.5 seconds
       setTimeout(() => {
-        router.push("/login");
+        router.push("/verify-otp");
       }, 1500);
     } catch (err: any) {
       setError(err.message || "Something went wrong. Please try again.");

@@ -190,11 +190,16 @@ export const applyToJob = async (req, res) => {
     // ✅ Optional resume upload
     if (req.file) {
       try {
+        // Keep the extension in the public_id so downloaded resumes open correctly
+        const ext = req.file.originalname.includes(".")
+          ? req.file.originalname.split(".").pop()
+          : "";
         const result = await uploadToCloudinary(
           req.file.buffer,
           "telecom-network/resumes",
           {
             resource_type: "raw",
+            public_id: `resume_${Date.now()}_${Math.round(Math.random() * 1e6)}${ext ? `.${ext}` : ""}`,
           },
         );
 

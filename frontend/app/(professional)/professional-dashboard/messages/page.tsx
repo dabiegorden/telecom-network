@@ -8,10 +8,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, MessageSquare, Send, Circle, Users } from "lucide-react";
+import {
+  Loader2,
+  MessageSquare,
+  Send,
+  Circle,
+  Users,
+  Paperclip,
+  X,
+  FileText,
+  Download,
+} from "lucide-react";
 import { messagesApi, connectionsApi } from "@/lib/api";
 import { getSocket } from "@/lib/socket";
-import { safeFormatDistanceToNow } from "@/lib/utils";
+import { safeFormatDistanceToNow, downloadFile } from "@/lib/utils";
 
 interface PublicUser {
   _id: string;
@@ -30,12 +40,21 @@ interface ConversationItem {
   unreadCount: number;
 }
 
+interface MessageAttachment {
+  url: string;
+  fileName?: string;
+  mimeType?: string;
+  fileType?: "image" | "document";
+  fileSize?: number;
+}
+
 interface MessageItem {
   _id: string;
   conversation: string;
   sender: PublicUser | string;
   recipient: PublicUser | string;
   content: string;
+  attachment?: MessageAttachment | null;
   read: boolean;
   createdAt: string;
 }
@@ -57,6 +76,10 @@ export default function MessagesPage() {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sending, setSending] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const [attachmentPreview, setAttachmentPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -176,7 +199,7 @@ export default function MessagesPage() {
         const updated = [...prev];
         const conv = { ...updated[idx] };
         conv.lastMessage = {
-          content: message.content,
+          content: message.content || "📎 Attachment",
           sender: senderId || "",
           read: isActiveConversation,
           createdAt: message.createdAt,
@@ -260,15 +283,48 @@ export default function MessagesPage() {
     }, 1500);
   };
 
+  const handleAttachmentSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("File must be smaller than 10 MB.");
+      e.target.value = "";
+      return;
+    }
+    setAttachment(file);
+    setAttachmentPreview(
+      file.type.startsWith("image/") ? URL.createObjectURL(file) : null,
+    );
+    e.target.value = "";
+  };
+
+  const clearAttachment = () => {
+    if (attachmentPreview) URL.revokeObjectURL(attachmentPreview);
+    setAttachment(null);
+    setAttachmentPreview(null);
+  };
+
   const handleSend = async () => {
-    if (!content.trim() || !active || sending) return;
+    if ((!content.trim() && !attachment) || !active || sending) return;
     const text = content.trim();
+    const file = attachment;
     setContent("");
+    clearAttachment();
     setSending(true);
 
     const socket = getSocket();
     try {
-      if (socket?.connected) {
+      if (file) {
+        // Attachments go over HTTP (multipart); the server still delivers the
+        // message to the recipient in real time via the socket.
+        const res = await messagesApi.sendMessage(active._id, text, file);
+        if (res.success) {
+          setMessages((prev) => [...prev, res.data]);
+        } else {
+          toast.error(res.message || "Failed to send attachment.");
+          return;
+        }
+      } else if (socket?.connected) {
         socket.emit("send_message", {
           conversationId: active._id,
           recipientId: active.otherUser._id,
@@ -285,7 +341,7 @@ export default function MessagesPage() {
         const updated = [...prev];
         const conv = { ...updated[idx] };
         conv.lastMessage = {
-          content: text,
+          content: text || "📎 Attachment",
           sender: currentUserId || "",
           read: true,
           createdAt: new Date().toISOString(),
@@ -467,7 +523,43 @@ export default function MessagesPage() {
                               : "rounded-bl-sm bg-slate-700 text-slate-100"
                           }`}
                         >
-                          <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                          {message.attachment?.url &&
+                            (message.attachment.fileType === "image" ? (
+                              <a
+                                href={message.attachment.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  src={message.attachment.url}
+                                  alt={message.attachment.fileName || "Image"}
+                                  className="mb-1 max-h-60 w-full rounded-lg object-cover"
+                                />
+                              </a>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  downloadFile(
+                                    message.attachment!.url,
+                                    message.attachment!.fileName,
+                                  )
+                                }
+                                className={`mb-1 flex w-full items-center gap-2 rounded-lg p-2 text-left ${
+                                  isMine ? "bg-cyan-700/60" : "bg-slate-600/60"
+                                }`}
+                              >
+                                <FileText className="h-6 w-6 shrink-0" />
+                                <span className="min-w-0 flex-1 truncate text-xs">
+                                  {message.attachment.fileName || "Document"}
+                                </span>
+                                <Download className="h-4 w-4 shrink-0" />
+                              </button>
+                            ))}
+                          {message.content && (
+                            <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                          )}
                           <p
                             className={`mt-1 text-[10px] ${
                               isMine ? "text-cyan-100/70" : "text-slate-400"
@@ -484,7 +576,54 @@ export default function MessagesPage() {
               )}
             </div>
 
+            {attachment && (
+              <div className="flex items-center gap-3 border-t border-slate-700 bg-slate-800/70 px-3 py-2">
+                {attachmentPreview ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={attachmentPreview}
+                    alt="Preview"
+                    className="h-12 w-12 rounded-lg object-cover"
+                  />
+                ) : (
+                  <FileText className="h-8 w-8 text-cyan-400" />
+                )}
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm text-white">{attachment.name}</p>
+                  <p className="text-xs text-slate-400">
+                    {(attachment.size / 1024 / 1024).toFixed(2)} MB
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={clearAttachment}
+                  className="text-slate-400 hover:text-red-400"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+
             <div className="flex items-center gap-2 border-t border-slate-700 p-3">
+              <input
+                ref={fileInputRef}
+                type="file"
+                hidden
+                accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.ppt,.pptx"
+                onChange={handleAttachmentSelect}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={sending}
+                title="Attach an image or document"
+                className="text-slate-400 hover:text-cyan-400 hover:bg-slate-700"
+              >
+                <Paperclip className="h-5 w-5" />
+              </Button>
               <Input
                 value={content}
                 onChange={(e) => handleTypingChange(e.target.value)}
@@ -500,7 +639,7 @@ export default function MessagesPage() {
               />
               <Button
                 onClick={handleSend}
-                disabled={sending || !content.trim()}
+                disabled={sending || (!content.trim() && !attachment)}
                 size="icon"
                 className="bg-cyan-600 hover:bg-cyan-500 text-white"
               >

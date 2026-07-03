@@ -8,7 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import {
   Users, UserCheck, UserCog, Briefcase, Activity, TrendingUp,
   MessageSquare, Download, FileText, Link2, Loader2,
+  Heart, Eye, Clock, ArrowRight,
 } from "lucide-react";
+import Link from "next/link";
+import { safeFormatDistanceToNow } from "@/lib/utils";
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -34,6 +37,18 @@ interface PlatformData {
   jobGrowth: { month: string; count: number }[];
   roleDist: { role: string; count: number }[];
 }
+
+interface ForumPost {
+  _id: string;
+  title: string;
+  category: string;
+  likeCount: number;
+  commentCount: number;
+  viewCount: number;
+  createdAt: string;
+}
+
+const API = process.env.NEXT_PUBLIC_API_URL || "/api";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -109,11 +124,23 @@ export default function AdminDashboardPage() {
   const [data, setData] = useState<PlatformData | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const [forumPosts, setForumPosts] = useState<ForumPost[]>([]);
+
   useEffect(() => {
     analyticsApi.getPlatformAnalytics().then((res) => {
       if (res.success) setData(res.data);
       setLoading(false);
     });
+
+    const token = localStorage.getItem("token");
+    fetch(`${API}/posts?limit=5&sort=newest`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then((res) => {
+        if (res.success) setForumPosts((res.data || []).slice(0, 5));
+      })
+      .catch(() => {});
   }, []);
 
   if (loading) {
@@ -384,6 +411,55 @@ export default function AdminDashboardPage() {
               </div>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Community Forum */}
+      <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-sm">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-white flex items-center gap-2">
+                <MessageSquare className="h-5 w-5 text-pink-400" />
+                Community Forum
+              </CardTitle>
+              <CardDescription className="text-slate-400">
+                Latest discussions from the community
+              </CardDescription>
+            </div>
+            <Link href="/admin-dashboard/posts">
+              <Button variant="ghost" size="sm" className="text-cyan-400 hover:text-cyan-300 hover:bg-slate-700">
+                View forum <ArrowRight className="h-4 w-4 ml-1" />
+              </Button>
+            </Link>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {forumPosts.length === 0 ? (
+            <div className="text-center py-8 text-slate-400">
+              <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-50" />
+              <p>No forum posts yet</p>
+            </div>
+          ) : (
+            forumPosts.map((post) => (
+              <Link
+                key={post._id}
+                href="/admin-dashboard/posts"
+                className="block bg-slate-800/50 border border-slate-700 rounded-lg p-4 hover:border-slate-600 transition-colors"
+              >
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <h3 className="font-semibold text-white flex-1 line-clamp-2">{post.title}</h3>
+                  <Badge className="bg-cyan-500/10 text-cyan-400 border-cyan-500/20">{post.category}</Badge>
+                </div>
+                <div className="flex items-center gap-4 text-xs text-slate-400">
+                  <div className="flex items-center gap-1"><Heart className="h-3 w-3" />{post.likeCount}</div>
+                  <div className="flex items-center gap-1"><MessageSquare className="h-3 w-3" />{post.commentCount}</div>
+                  <div className="flex items-center gap-1"><Eye className="h-3 w-3" />{post.viewCount}</div>
+                  <div className="flex items-center gap-1 ml-auto"><Clock className="h-3 w-3" />{safeFormatDistanceToNow(post.createdAt)}</div>
+                </div>
+              </Link>
+            ))
+          )}
         </CardContent>
       </Card>
 

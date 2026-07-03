@@ -33,6 +33,19 @@ export const sendEmail = async ({ to, subject, html }) => {
   }
 };
 
+export const otpEmailTemplate = (name, otp) => `
+  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1e293b;">
+    <h2 style="color: #0ea5e9;">Your TelecomNet Ghana Verification Code</h2>
+    <p>Hi ${name},</p>
+    <p>Use the one-time code below to verify your identity and complete your sign-in:</p>
+    <div style="background: #f1f5f9; border-radius: 8px; padding: 24px; text-align: center; margin: 24px 0;">
+      <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #0f172a;">${otp}</span>
+    </div>
+    <p>This code expires in <strong>10 minutes</strong>. If you did not request it, you can safely ignore this email.</p>
+    <p style="margin-top: 24px;">— The TelecomNet Ghana Team</p>
+  </div>
+`;
+
 export const welcomeEmailTemplate = (name) => `
   <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1e293b;">
     <h2 style="color: #0ea5e9;">Welcome to TelecomNet Ghana, ${name}! 🎉</h2>

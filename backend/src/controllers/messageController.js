@@ -3,6 +3,41 @@ import Conversation from "../models/Conversation.js";
 import Message from "../models/Message.js";
 import User from "../models/User.js";
 import { getIO, getOnlineUsers } from "../socket.js";
+import { uploadToCloudinary } from "../utils/cloudinary.js";
+
+/**
+ * Upload a chat attachment to Cloudinary.
+ * Images use the image pipeline; documents are stored as raw files with the
+ * original extension preserved in the public_id so downloads stay readable.
+ */
+const uploadAttachment = async (file) => {
+  const isImage = file.mimetype.startsWith("image/");
+  const options = { resource_type: isImage ? "image" : "raw" };
+
+  if (!isImage) {
+    const ext = file.originalname.includes(".")
+      ? file.originalname.split(".").pop()
+      : "";
+    options.public_id = `msg_${Date.now()}_${Math.round(Math.random() * 1e6)}${
+      ext ? `.${ext}` : ""
+    }`;
+  }
+
+  const result = await uploadToCloudinary(
+    file.buffer,
+    "telecom-network/messages",
+    options,
+  );
+
+  return {
+    url: result.url,
+    publicId: result.publicId,
+    fileName: file.originalname,
+    mimeType: file.mimetype,
+    fileType: isImage ? "image" : "document",
+    fileSize: file.size,
+  };
+};
 
 /**
  * Find an existing conversation between two users or create a new one.
@@ -29,12 +64,14 @@ export const createAndDeliverMessage = async ({
   senderId,
   recipientId,
   content,
+  attachment,
 }) => {
   const message = await Message.create({
     conversation: conversationId,
     sender: senderId,
     recipient: recipientId,
-    content,
+    content: content || "",
+    ...(attachment && { attachment }),
   });
 
   await Conversation.findByIdAndUpdate(conversationId, {
@@ -203,8 +240,11 @@ export const sendMessage = async (req, res) => {
     const { conversationId } = req.params;
     const { content } = req.body;
 
-    if (!content || !content.trim()) {
-      return res.status(400).json({ success: false, message: "Message content is required." });
+    if ((!content || !content.trim()) && !req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Message content or an attachment is required.",
+      });
     }
 
     const conversation = await Conversation.findOne({
@@ -220,11 +260,17 @@ export const sendMessage = async (req, res) => {
       (p) => p.toString() !== req.user._id.toString(),
     );
 
+    let attachment = null;
+    if (req.file) {
+      attachment = await uploadAttachment(req.file);
+    }
+
     const message = await createAndDeliverMessage({
       conversationId: conversation._id,
       senderId: req.user._id,
       recipientId,
-      content: content.trim(),
+      content: content ? content.trim() : "",
+      attachment,
     });
 
     res.status(201).json({ success: true, data: message });

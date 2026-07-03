@@ -339,6 +339,24 @@ export const authApi = {
     });
     return response.json();
   },
+
+  verifyOtp: async (email: string, otp: string) => {
+    const response = await fetch(`${API}/auth/verify-otp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, otp }),
+    });
+    return response.json();
+  },
+
+  resendOtp: async (email: string) => {
+    const response = await fetch(`${API}/auth/resend-otp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    return response.json();
+  },
 };
 
 // ─── Notifications API ────────────────────────────────────────────────────────
@@ -460,14 +478,24 @@ export const messagesApi = {
     return response.json();
   },
 
-  sendMessage: async (conversationId: string, content: string) => {
+  sendMessage: async (conversationId: string, content: string, file?: File) => {
+    let body: BodyInit;
+    let headers: Record<string, string> = { ...getAuthHeaders() };
+
+    if (file) {
+      const formData = new FormData();
+      formData.append("content", content);
+      formData.append("attachment", file);
+      body = formData;
+    } else {
+      headers["Content-Type"] = "application/json";
+      body = JSON.stringify({ content });
+    }
+
     const response = await fetch(`${API}/messages/conversations/${conversationId}`, {
       method: "POST",
-      headers: {
-        ...getAuthHeaders(),
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ content }),
+      headers,
+      body,
     });
     return response.json();
   },

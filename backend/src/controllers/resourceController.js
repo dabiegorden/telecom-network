@@ -38,10 +38,23 @@ const detectFileType = (mimeType = "") => {
  */
 const uploadResourceFile = async (file) => {
   const isImage = file.mimetype.startsWith("image/");
+  const options = { resource_type: isImage ? "image" : "raw" };
+
+  // For raw files the extension must live inside the public_id, otherwise the
+  // delivered/downloaded file has no extension and won't open correctly.
+  if (!isImage) {
+    const ext = file.originalname.includes(".")
+      ? file.originalname.split(".").pop()
+      : "";
+    options.public_id = `res_${Date.now()}_${Math.round(Math.random() * 1e6)}${
+      ext ? `.${ext}` : ""
+    }`;
+  }
+
   const result = await uploadToCloudinary(
     file.buffer,
     "telecom-network/resources",
-    { resource_type: isImage ? "image" : "raw" },
+    options,
   );
   return result;
 };
